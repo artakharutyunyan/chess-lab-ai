@@ -148,16 +148,69 @@
   box-shadow: 0 0 0 2px var(--color-header-accent);
 }
 
+.mobile-nav-wrapper {
+  position: relative;
+  display: none;
+}
+
+.mobile-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--color-header-text);
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease;
+}
+
+.mobile-nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-nav-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-header-accent);
+}
+
+.mobile-nav-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: 8px;
+  gap: 2px;
+  background: var(--color-header-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-overlay);
+  z-index: 10;
+}
+
+.mobile-nav-panel .header-link {
+  padding: 10px 12px;
+}
+
+/* At narrower widths the four nav links plus logo and controls no longer
+   fit on one row (measured: ~545px needed at full size) -- collapse into
+   a hamburger menu instead of shrinking text into an unreadable/overflowing
+   row. */
 @media (max-width: 640px) {
   .header-container {
     gap: 16px;
     padding: 0 16px;
   }
   .header-nav {
-    gap: 14px;
+    display: none;
   }
-  .header-link {
-    font-size: 13px;
-    padding: 6px 8px;
+  .mobile-nav-wrapper {
+    display: flex;
+    flex: 1;
   }
 }

@@ -58,16 +58,20 @@ function useChessClocks(activePlayer: "w" | "b" | null, resetToken: number, init
 
 function ClockChip({ ms, running }: { ms: number; running: boolean }) {
   const label = formatClock(ms);
-  const critical = ms <= 30000;
+  const seconds = Math.ceil(ms / 1000);
+  // Only the running clock is actually counting down -- announcing the
+  // idle side's static remaining time is just noise. Fixed thresholds
+  // (not "every second under 30") keep this from firing ~30 times.
+  const announce = running && (seconds === 30 || seconds === 10 || seconds === 5);
   return (
     <div
       className={`play-clock${running ? " play-clock--running" : ""}`}
       aria-live="off"
     >
       {label}
-      {critical && (
+      {announce && (
         <span className="visually-hidden" aria-live="polite">
-          {Math.ceil(ms / 1000)} seconds left
+          {seconds} seconds left
         </span>
       )}
     </div>
@@ -263,9 +267,9 @@ export default function PlayPanel({
             </>
           )}
         </div>
-        <div className="play-movelist-body" role="list">
+        <ol className="play-movelist-body">
           {moveRows.map((row, i) => (
-            <div className="play-move-row" role="listitem" key={row.number}>
+            <li className="play-move-row" key={row.number}>
               <span className="play-move-number">{row.number}.</span>
               <span
                 ref={i === currentRow && currentColor === "white" ? currentMoveRef : undefined}
@@ -287,9 +291,9 @@ export default function PlayPanel({
               >
                 {row.black}
               </span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
 
       {bottomRow}

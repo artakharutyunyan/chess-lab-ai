@@ -5,8 +5,10 @@ export const ru = {
       worldChampions: "Чемпионы мира",
       play: "Играть",
       changeLanguage: "Изменить язык",
-      toggleTheme: "Переключить тёмную тему",
+      switchToLight: "Переключить на светлую тему",
+      switchToDark: "Переключить на тёмную тему",
       board: "Доска",
+      menu: "Меню",
     },
     boardSettings: {
       title: "Настройки доски",
@@ -76,6 +78,15 @@ export const ru = {
       start: "Начать игру",
       minuteUnit: "мин",
       hourUnit: "ч",
+      chessBoard: "Шахматная доска",
+      pieceType: {
+        king: "король",
+        queen: "ферзь",
+        rook: "ладья",
+        bishop: "слон",
+        knight: "конь",
+        pawn: "пешка",
+      },
     },
   },
 };

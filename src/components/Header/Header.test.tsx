@@ -55,13 +55,25 @@ test("selecting a language switches the rendered text and closes the popup", asy
   expect(screen.queryByText("English")).not.toBeInTheDocument();
 });
 
+test("opens the mobile nav menu and closes it on an outside click", async () => {
+  const user = userEvent.setup();
+  renderHeader();
+
+  const menuButton = screen.getByRole("button", { name: /menu/i });
+  await user.click(menuButton);
+  expect(screen.getAllByRole("link", { name: /home/i })).toHaveLength(2);
+
+  await user.click(document.body);
+  expect(screen.getAllByRole("link", { name: /home/i })).toHaveLength(1);
+});
+
 test("theme toggle switches the document's data-theme and persists it", async () => {
   const user = userEvent.setup();
   renderHeader();
 
   expect(document.documentElement.getAttribute("data-theme")).toBe("light");
 
-  await user.click(screen.getByRole("button", { name: /toggle dark mode/i }));
+  await user.click(screen.getByRole("button", { name: /switch to dark mode/i }));
 
   expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   expect(window.localStorage.getItem("theme")).toBe("dark");

@@ -675,6 +675,9 @@ export class Board extends React.Component {
               movablePlayer={movablePlayer}
               flipped={this.state.board_flipped}
               onSquareClick={(i) => this.handleClick(i)}
+              onFlip={() => this.flipBoard()}
+              onStepBack={() => this.viewHistory("back")}
+              onStepForward={() => this.viewHistory("next")}
             />
           </div>
 

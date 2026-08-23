@@ -40,4 +40,10 @@ if (typeof window !== "undefined" && !window.localStorage) {
   });
 }
 
+// jsdom doesn't implement scrollIntoView (there's no real layout to scroll);
+// PlayPanel calls it to keep the current move visible in the move list.
+if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function scrollIntoView() {};
+}
+
 await i18n.changeLanguage("en");

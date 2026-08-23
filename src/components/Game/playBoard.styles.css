@@ -4,6 +4,7 @@
 
 .play-board {
   --sq-size: 88px;
+
   display: flex;
   flex-direction: column;
   width: calc(var(--sq-size) * 8);
@@ -51,6 +52,12 @@
 
 .play-square--drag-over {
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+}
+
+.play-square:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 3px var(--accent);
+  z-index: 1;
 }
 
 .play-piece--dragging {

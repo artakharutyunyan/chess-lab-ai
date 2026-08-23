@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { Squares } from "./engine/pieces";
 import { TYPE_BY_LETTER, getPieceIcon } from "./pieceSets";
 import { useBoardSettings } from "../../context/BoardSettingsContext";
@@ -23,14 +25,9 @@ interface PlayBoardProps {
   movablePlayer: "w" | "b" | null;
   flipped: boolean;
   onSquareClick: (index: number) => void;
-}
-
-function squareLabel(file: string, rank: number, ascii: string | null): string {
-  const coord = `${file}${rank}`;
-  if (ascii == null) return coord;
-  const isWhite = ascii === ascii.toLowerCase();
-  const type = TYPE_BY_LETTER[ascii.toLowerCase()];
-  return `${coord}, ${isWhite ? "white" : "black"} ${type}`;
+  onFlip: () => void;
+  onStepBack: () => void;
+  onStepForward: () => void;
 }
 
 export default function PlayBoard({
@@ -42,13 +39,87 @@ export default function PlayBoard({
   movablePlayer,
   flipped,
   onSquareClick,
+  onFlip,
+  onStepBack,
+  onStepForward,
 }: PlayBoardProps) {
   const { pieceSetId } = useBoardSettings();
+  const { t } = useTranslation();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
+  // Roving-tabindex keyboard cursor, tracked as a *visual* row/col so
+  // arrow keys always move the direction the player sees, regardless of
+  // board orientation. Only the cursor cell is tab-reachable; arrow keys
+  // move it, Enter/Space acts on it, matching docs/PLAY-PAGE-SPEC.md.
+  const [cursor, setCursor] = useState({ row: 0, col: 0 });
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const skipNextFocus = useRef(true);
+
+  useEffect(() => {
+    if (skipNextFocus.current) {
+      // Don't steal focus on mount -- only move it in response to actual
+      // keyboard/click navigation.
+      skipNextFocus.current = false;
+      return;
+    }
+    cursorRef.current?.focus();
+  }, [cursor]);
+
+  function squareLabel(file: string, rank: number, ascii: string | null): string {
+    const coord = `${file}${rank}`;
+    if (ascii == null) return coord;
+    const isWhite = ascii === ascii.toLowerCase();
+    const type = TYPE_BY_LETTER[ascii.toLowerCase()];
+    const color = t(isWhite ? "game.white" : "game.black");
+    return `${coord}, ${color} ${t(`game.pieceType.${type}`)}`;
+  }
+
+  function handleGridKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    switch (e.key) {
+      case "ArrowUp":
+        e.preventDefault();
+        setCursor((c) => ({ ...c, row: Math.max(0, c.row - 1) }));
+        break;
+      case "ArrowDown":
+        e.preventDefault();
+        setCursor((c) => ({ ...c, row: Math.min(7, c.row + 1) }));
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) onStepBack();
+        else setCursor((c) => ({ ...c, col: Math.max(0, c.col - 1) }));
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) onStepForward();
+        else setCursor((c) => ({ ...c, col: Math.min(7, c.col + 1) }));
+        break;
+      case "Enter":
+      case " ": {
+        e.preventDefault();
+        const i = flipped ? 7 - cursor.row : cursor.row;
+        const j = flipped ? 7 - cursor.col : cursor.col;
+        onSquareClick(i * 8 + j);
+        break;
+      }
+      case "f":
+      case "F":
+        e.preventDefault();
+        onFlip();
+        break;
+      default:
+        break;
+    }
+  }
+
   return (
-    <div className="play-board" role="grid" aria-label="Chess board">
+    <div
+      className="play-board"
+      role="grid"
+      aria-label={t("game.chessBoard")}
+      onKeyDown={handleGridKeyDown}
+    >
       {ROWS.map((visualRow) => {
         return (
           <div className="play-board-row" role="row" key={visualRow}>
@@ -62,6 +133,7 @@ export default function PlayBoard({
               const piece = squares[index];
               const legal = legalTargets.find((t) => t.index === index);
               const isMovable = movablePlayer != null && piece.player === movablePlayer;
+              const isCursor = visualRow === cursor.row && visualCol === cursor.col;
               const coordTone = dark ? "play-coord--on-dark" : "play-coord--on-light";
 
               const className = [
@@ -76,10 +148,15 @@ export default function PlayBoard({
               return (
                 <div
                   key={index}
+                  ref={isCursor ? cursorRef : undefined}
                   role="gridcell"
                   aria-label={squareLabel(file, rank, piece.ascii)}
                   className={className}
-                  onClick={() => onSquareClick(index)}
+                  tabIndex={isCursor ? 0 : -1}
+                  onClick={() => {
+                    setCursor({ row: visualRow, col: visualCol });
+                    onSquareClick(index);
+                  }}
                   onDragOver={(e) => {
                     if (draggedIndex == null) return;
                     e.preventDefault();

@@ -53,14 +53,51 @@ function suppressMouseFocusRing(event) {
   event.preventDefault();
 }
 
+function HamburgerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function NavLinks({ onNavigate }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <NavLink to="/" end className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.home")}
+      </NavLink>
+      <NavLink to="/champions" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.worldChampions")}
+      </NavLink>
+      <NavLink to="/game" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.play")}
+      </NavLink>
+      <NavLink to="/board" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.board")}
+      </NavLink>
+    </>
+  );
+}
+
 function Header() {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const languageSwitchRef = useRef(null);
+  const navRef = useRef(null);
 
   const closePopup = () => setIsOpen(false);
+  const closeNav = () => setIsNavOpen(false);
   useOnClickOutside(languageSwitchRef, closePopup);
+  useOnClickOutside(navRef, closeNav);
 
   return (
     <header className="header">
@@ -70,36 +107,27 @@ function Header() {
         </Link>
 
         <nav className="header-nav">
-          <NavLink
-            to="/"
-            end
-            className={navLinkClass}
-            onMouseDown={suppressMouseFocusRing}
-          >
-            {t("header.home")}
-          </NavLink>
-          <NavLink
-            to="/champions"
-            className={navLinkClass}
-            onMouseDown={suppressMouseFocusRing}
-          >
-            {t("header.worldChampions")}
-          </NavLink>
-          <NavLink
-            to="/game"
-            className={navLinkClass}
-            onMouseDown={suppressMouseFocusRing}
-          >
-            {t("header.play")}
-          </NavLink>
-          <NavLink
-            to="/board"
-            className={navLinkClass}
-            onMouseDown={suppressMouseFocusRing}
-          >
-            {t("header.board")}
-          </NavLink>
+          <NavLinks />
         </nav>
+
+        <div className="mobile-nav-wrapper" ref={navRef}>
+          <button
+            type="button"
+            className="mobile-nav-button"
+            onClick={() => setIsNavOpen((open) => !open)}
+            onMouseDown={suppressMouseFocusRing}
+            aria-haspopup="true"
+            aria-expanded={isNavOpen}
+            aria-label={t("header.menu")}
+          >
+            <HamburgerIcon />
+          </button>
+          {isNavOpen && (
+            <nav className="mobile-nav-panel">
+              <NavLinks onNavigate={closeNav} />
+            </nav>
+          )}
+        </div>
 
         <div className="header-controls">
           <button
@@ -107,7 +135,7 @@ function Header() {
             className="theme-toggle-button"
             onClick={toggleTheme}
             onMouseDown={suppressMouseFocusRing}
-            aria-label={t("header.toggleTheme")}
+            aria-label={t(theme === "dark" ? "header.switchToLight" : "header.switchToDark")}
           >
             <ThemeIcon theme={theme} />
           </button>

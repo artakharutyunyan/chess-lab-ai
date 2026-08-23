@@ -11,7 +11,7 @@ function ChampionsList() {
       <h1 className="champions-title">{t("championsList.header")}</h1>
       <p className="champions-intro">{t("championsList.text")}</p>
       <div className="champions-grid">
-        {champions.map((champion) => (
+        {champions.map((champion, index) => (
           <div key={champion.id} className="champion-card">
             <a
               href={champion.wiki}
@@ -23,6 +23,7 @@ function ChampionsList() {
                 src={champion.img}
                 alt={t(champion.name)}
                 className="champion-photo"
+                loading={index < 4 ? "eager" : "lazy"}
               />
             </a>
             <div className="champion-name">{t(champion.name)}</div>

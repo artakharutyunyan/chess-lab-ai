@@ -5,8 +5,10 @@ export const am = {
       worldChampions: "Աշխարհի չեմպիոններ",
       play: "Խաղալ",
       changeLanguage: "Փոխել լեզուն",
-      toggleTheme: "Փոխել թեման",
+      switchToLight: "Անցնել լուսավոր ռեժիմին",
+      switchToDark: "Անցնել մուգ ռեժիմին",
       board: "Տախտակ",
+      menu: "Ընտրացանկ",
     },
     boardSettings: {
       title: "Տախտակի կարգավորումներ",
@@ -76,6 +78,15 @@ export const am = {
       start: "Սկսել խաղը",
       minuteUnit: "րոպե",
       hourUnit: "ժամ",
+      chessBoard: "Շախմատի տախտակ",
+      pieceType: {
+        king: "արքա",
+        queen: "թագուհի",
+        rook: "նավակ",
+        bishop: "փիղ",
+        knight: "ձի",
+        pawn: "զինվոր",
+      },
     },
   },
 };

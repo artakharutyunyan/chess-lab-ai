@@ -32,7 +32,10 @@ interface StoredSettings {
 function readStoredSettings(): StoredSettings {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const parsed: unknown = raw ? JSON.parse(raw) : {};
+    return parsed != null && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as StoredSettings)
+      : {};
   } catch {
     return {};
   }

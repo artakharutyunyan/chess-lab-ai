@@ -5,8 +5,10 @@ export const en = {
       worldChampions: "World champions",
       play: "Play",
       changeLanguage: "Change language",
-      toggleTheme: "Toggle dark mode",
+      switchToLight: "Switch to light mode",
+      switchToDark: "Switch to dark mode",
       board: "Board",
+      menu: "Menu",
     },
     boardSettings: {
       title: "Board settings",
@@ -76,6 +78,15 @@ export const en = {
       start: "Start Game",
       minuteUnit: "min",
       hourUnit: "hr",
+      chessBoard: "Chess board",
+      pieceType: {
+        king: "king",
+        queen: "queen",
+        rook: "rook",
+        bishop: "bishop",
+        knight: "knight",
+        pawn: "pawn",
+      },
     },
   },
 };

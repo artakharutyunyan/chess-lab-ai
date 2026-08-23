@@ -19,8 +19,14 @@ const STORAGE_KEY = "theme";
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function getInitialTheme(): Theme {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  return stored === "dark" ? "dark" : "light";
+  // localStorage can throw (private browsing, storage blocked by policy) --
+  // that shouldn't take down the whole app over a theme preference.
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return stored === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -28,7 +34,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // Storage unavailable -- the theme still applies for this session,
+      // it just won't be remembered on the next visit.
+    }
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

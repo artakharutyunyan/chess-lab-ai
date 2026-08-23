@@ -5,7 +5,13 @@
   <meta charset="utf-8" />
   <script>
     (function () {
-      var stored = localStorage.getItem("theme");
+      var stored = null;
+      try {
+        stored = localStorage.getItem("theme");
+      } catch (e) {
+        // Storage unavailable (private browsing, blocked by policy) --
+        // fall back to light rather than leaving data-theme unset.
+      }
       document.documentElement.setAttribute(
         "data-theme",
         stored === "dark" ? "dark" : "light"

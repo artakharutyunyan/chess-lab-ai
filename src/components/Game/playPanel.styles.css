@@ -26,7 +26,7 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -134,7 +134,9 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  margin: 0;
   padding: 0 16px 12px;
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
