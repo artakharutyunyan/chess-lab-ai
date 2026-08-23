@@ -122,3 +122,52 @@ test("chooseBotMove picks a legal move in a simple position", () => {
   if (move == null) throw new Error("expected a move");
   expect(canMoveThere(move.start, move.end, squares, 65, NO_CASTLE)).toBe(true);
 });
+
+test("stalemate: boxed-in king with no check is stalemate, not checkmate", () => {
+  const squares = emptyBoard();
+  squares[7] = new King("b"); // h8
+  squares[13] = new King("w"); // f7
+  squares[22] = new Queen("w"); // g6 -- controls g7/g8/h7 without attacking h8 itself
+
+  expect(isStalemate("b", squares, 65, NO_CASTLE)).toBe(true);
+  expect(isCheckmate("b", squares, 65, NO_CASTLE)).toBe(false);
+});
+
+test("king cannot castle out of check", () => {
+  const squares = emptyBoard();
+  squares[60] = new King("w"); // e1
+  squares[63] = new Rook("w"); // h1
+  squares[28] = new Rook("b"); // e5, checks the white king along the open e-file
+
+  expect(canMoveThere(60, 62, squares, 65, NO_CASTLE)).toBe(false);
+});
+
+test("king cannot castle through an attacked square", () => {
+  const squares = emptyBoard();
+  squares[60] = new King("w"); // e1
+  squares[63] = new Rook("w"); // h1
+  squares[5] = new Rook("b"); // f8, controls the whole f-file including f1, the king's transit square
+
+  expect(canMoveThere(60, 62, squares, 65, NO_CASTLE)).toBe(false);
+});
+
+test("chooseBotMove skips the avoided move when another option exists", () => {
+  const squares = emptyBoard();
+  squares[0] = new King("b"); // a8
+  squares[9] = new Pawn("b"); // b7, blocks that escape square (own piece)
+  squares[60] = new King("w"); // e1, uninvolved
+
+  // Only two legal king moves exist from a8: a7 (index 8) and b8 (index 1).
+  // Excluding a7 should force b8, deterministically, regardless of eval.
+  const avoidMove = { start: 0, end: 8 };
+
+  const move = chooseBotMove({
+    squares,
+    depth: 1,
+    passantPos: 65,
+    castlingRights: NO_CASTLE,
+    avoidMove,
+  });
+
+  expect(move).toEqual({ start: 0, end: 1 });
+});
