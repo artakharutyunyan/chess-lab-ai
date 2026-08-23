@@ -70,3 +70,7 @@ docs/                # design specs and reference screenshots
 
 `docs/PLAY-PAGE-SPEC.md` is the approved design spec the current Play page was
 built against, with reference mockups in `docs/play-page-design/`.
+
+`docs/DESIGN-apple.md` is the Apple-derived design token reference (color,
+typography, spacing, radius, and elevation system) guiding the app's visual
+redesign.
