@@ -5,17 +5,6 @@ import "./playSetup.styles.css";
 const MINUTE_OPTIONS = [1, 2, 3, 5, 10, 15, 30];
 const HOUR_OPTIONS = [1, 2];
 
-function KingGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-      <rect x="11" y="2" width="2" height="6" fill="currentColor" />
-      <rect x="8.5" y="4.5" width="7" height="2" fill="currentColor" />
-      <path d="M6 20 L7 11 L17 11 L18 20 Z" fill="currentColor" />
-      <circle cx="12" cy="11" r="3.4" fill="currentColor" />
-    </svg>
-  );
-}
-
 export interface PlaySetupProps {
   humanPlayer: "w" | "b";
   timeControlMs: number;
@@ -86,9 +75,10 @@ export default function PlaySetup({
             onClick={() => onSelectHumanPlayer("w")}
             aria-pressed={humanPlayer === "w"}
           >
-            <span className="play-setup-side-glyph play-setup-side-glyph--white">
-              <KingGlyph />
-            </span>
+            <span
+              className="play-setup-side-glyph play-setup-side-glyph--white"
+              aria-hidden="true"
+            />
             {t("game.white")}
           </button>
           <button
@@ -99,9 +89,10 @@ export default function PlaySetup({
             onClick={() => onSelectHumanPlayer("b")}
             aria-pressed={humanPlayer === "b"}
           >
-            <span className="play-setup-side-glyph play-setup-side-glyph--black">
-              <KingGlyph />
-            </span>
+            <span
+              className="play-setup-side-glyph play-setup-side-glyph--black"
+              aria-hidden="true"
+            />
             {t("game.black")}
           </button>
         </div>

@@ -74,17 +74,6 @@ function ClockChip({ ms, running }: { ms: number; running: boolean }) {
   );
 }
 
-function KingGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <rect x="11" y="2" width="2" height="6" fill="currentColor" />
-      <rect x="8.5" y="4.5" width="7" height="2" fill="currentColor" />
-      <path d="M6 20 L7 11 L17 11 L18 20 Z" fill="currentColor" />
-      <circle cx="12" cy="11" r="3.4" fill="currentColor" />
-    </svg>
-  );
-}
-
 function PlayerRow({
   label,
   captured,
@@ -100,9 +89,7 @@ function PlayerRow({
 }) {
   return (
     <div className="play-player-row">
-      <div className="play-avatar">
-        <KingGlyph />
-      </div>
+      <div className="play-avatar" aria-hidden="true" />
       <div className="play-player-info">
         <div className="play-player-name">{label}</div>
         <div className="play-captured-row">
