@@ -17,6 +17,12 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.brand-logo-link:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-header-accent);
 }
 
 .brand-logo {
