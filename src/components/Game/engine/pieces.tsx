@@ -1,4 +1,4 @@
-import React from "react";
+import type { ReactElement } from "react";
 
 import whiteKing from "../../../images/white_king.png";
 import whiteBishop from "../../../images/white_bishop.png";
@@ -13,14 +13,36 @@ import blackPawn from "../../../images/black_pawn.png";
 import blackQueen from "../../../images/black_queen.png";
 import blackRock from "../../../images/black_rook.png";
 
+export type Player = "w" | "b";
+
+// Shared shape every square on the board holds, real piece or empty
+// (filler_piece). Board.jsx also mutates `highlight`/`possible`, and King
+// additionally carries `checked`/`in_check` used only by Board's render/
+// highlight helpers -- neither is part of the engine's own contract, so
+// they're left off this shared type.
+export interface Piece {
+  player: Player | null;
+  highlight: number;
+  possible: number;
+  icon: ReactElement | null;
+  ascii: string | null;
+  can_move(start: number, end: number): boolean;
+}
+
+export type Squares = Piece[];
+
 // Piece Classes ========================================
-export class King {
-  constructor(player) {
+export class King implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  checked = 0;
+  in_check = 0;
+  icon: ReactElement;
+  ascii: "k" | "K";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
-    this.checked = 0;
-    this.in_check = 0;
     this.icon =
       player === "w" ? (
         <img src={whiteKing} className="piece" alt="white king"></img>
@@ -31,7 +53,7 @@ export class King {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -64,11 +86,15 @@ export class King {
     return false;
   }
 }
-export class Queen {
-  constructor(player) {
+export class Queen implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  icon: ReactElement;
+  ascii: "q" | "Q";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon =
       player === "w" ? (
         <img src={whiteQueen} className="piece" alt="white queen"></img>
@@ -79,7 +105,7 @@ export class Queen {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -104,11 +130,15 @@ export class Queen {
     return false;
   }
 }
-export class Knight {
-  constructor(player) {
+export class Knight implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  icon: ReactElement;
+  ascii: "n" | "N";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon =
       player === "w" ? (
         <img src={whiteKnight} className="piece" alt="white knight"></img>
@@ -119,7 +149,7 @@ export class Knight {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -148,11 +178,15 @@ export class Knight {
     return false;
   }
 }
-export class Bishop {
-  constructor(player) {
+export class Bishop implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  icon: ReactElement;
+  ascii: "b" | "B";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon =
       player === "w" ? (
         <img src={whiteBishop} className="piece" alt="white bishop"></img>
@@ -163,7 +197,7 @@ export class Bishop {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -180,11 +214,15 @@ export class Bishop {
     return false;
   }
 }
-export class Pawn {
-  constructor(player) {
+export class Pawn implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  icon: ReactElement;
+  ascii: "p" | "P";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon =
       player === "w" ? (
         <img src={whitePawn} className="piece" alt="white pawn"></img>
@@ -195,7 +233,7 @@ export class Pawn {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -220,11 +258,15 @@ export class Pawn {
     return false;
   }
 }
-export class Rook {
-  constructor(player) {
+export class Rook implements Piece {
+  player: Player;
+  highlight = 0;
+  possible = 0;
+  icon: ReactElement;
+  ascii: "r" | "R";
+
+  constructor(player: Player) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon =
       player === "w" ? (
         <img src={whiteRock} className="piece" alt="white rock"></img>
@@ -235,7 +277,7 @@ export class Rook {
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(start: number, end: number): boolean {
     var start_row = 8 - Math.floor(start / 8);
     var start_col = (start % 8) + 1;
     var end_row = 8 - Math.floor(end / 8);
@@ -256,24 +298,28 @@ export class Rook {
     return false;
   }
 }
-export class filler_piece {
-  constructor(player) {
+export class filler_piece implements Piece {
+  player: null;
+  highlight = 0;
+  possible = 0;
+  icon: null;
+  ascii: null;
+
+  constructor(player: null) {
     this.player = player;
-    this.highlight = 0;
-    this.possible = 0;
     this.icon = null;
     this.ascii = null;
   }
 
   // function that defines piece's valid move shape
-  can_move(start, end) {
+  can_move(_start: number, _end: number): boolean {
     return false;
   }
 }
 
 // initialize the chess board
-export function initializeBoard() {
-  const squares = Array(64).fill(null);
+export function initializeBoard(): Squares {
+  const squares: (Piece | null)[] = Array(64).fill(null);
   // black pawns
   for (let i = 8; i < 16; i++) {
     squares[i] = new Pawn("b");
@@ -311,5 +357,5 @@ export function initializeBoard() {
     if (squares[i] == null) squares[i] = new filler_piece(null);
   }
 
-  return squares;
+  return squares as Squares;
 }

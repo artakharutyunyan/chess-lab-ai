@@ -1,7 +1,13 @@
-import { canMoveThere, makeMove } from "./rules";
+import { canMoveThere, makeMove, type CastlingRights } from "./rules";
+import type { Piece, Squares } from "./pieces";
+
+export interface Move {
+  start: number;
+  end: number;
+}
 
 // Fisher-Yates shuffle
-function shuffle(passed_in_array) {
+function shuffle(passed_in_array: number[]): number[] {
   const array = passed_in_array.slice();
   for (let i = array.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
@@ -10,11 +16,11 @@ function shuffle(passed_in_array) {
   return array;
 }
 // function to reverse an array
-function reverseArray(array) {
+function reverseArray<T>(array: T[]): T[] {
   return array.slice().reverse();
 }
 // return value of a piece
-function getPieceValue(piece, position) {
+function getPieceValue(piece: Piece, position: number): number {
   let pieceValue = 0;
   if (piece.ascii == null) return 0;
 
@@ -129,7 +135,7 @@ function getPieceValue(piece, position) {
 }
 
 // calculate black's status using piece values
-function evaluateBlack(squares) {
+function evaluateBlack(squares: Squares): number {
   let total_eval = 0;
   for (let i = 0; i < 64; i++) total_eval += getPieceValue(squares[i], i);
   return total_eval;
@@ -137,16 +143,16 @@ function evaluateBlack(squares) {
 
 // minimax algorithm with alpha-beta pruning for the chess bot
 function minimax(
-  depth,
-  is_black_player,
-  alpha,
-  beta,
-  squares,
-  RA_of_starts,
-  RA_of_ends,
-  passant_pos,
-  castlingRights
-) {
+  depth: number,
+  is_black_player: boolean,
+  alpha: number,
+  beta: number,
+  squares: Squares,
+  RA_of_starts: number[],
+  RA_of_ends: number[],
+  passant_pos: number,
+  castlingRights: CastlingRights
+): number {
   const copy_squares = squares.slice();
   if (depth === 0) {
     return evaluateBlack(copy_squares);
@@ -227,6 +233,14 @@ function minimax(
   return best_value;
 }
 
+export interface ChooseBotMoveArgs {
+  squares: Squares;
+  depth: number;
+  passantPos: number;
+  castlingRights: CastlingRights;
+  avoidMove: Move | null;
+}
+
 // Choose black's move for the given position by searching `depth` plies
 // ahead with minimax. `avoidMove` (a {start, end} pair), when given, is
 // skipped as a candidate unless it's the only legal move available -- used
@@ -238,12 +252,12 @@ export function chooseBotMove({
   passantPos,
   castlingRights,
   avoidMove,
-}) {
+}: ChooseBotMoveArgs): Move | null {
   const copy_squares = squares.slice();
   let rand_start = 100;
   let rand_end = 100;
-  let RA_of_starts = [];
-  let RA_of_ends = [];
+  let RA_of_starts: number[] = [];
+  let RA_of_ends: number[] = [];
   for (let i = 0; i < 64; i++) {
     RA_of_starts.push(i);
     RA_of_ends.push(i);
@@ -252,7 +266,7 @@ export function chooseBotMove({
   RA_of_ends = shuffle(RA_of_ends);
 
   // create array of possible moves
-  let moves = [];
+  let moves: number[] = [];
   for (let i = 0; i < 64; i++) {
     let start = RA_of_starts[i];
     let isBlackPiece =
@@ -291,7 +305,12 @@ export function chooseBotMove({
 
     const test_squares = squares.slice();
     // make the move
-    const test_squares_2 = makeMove(test_squares, start, end, passantPos).slice();
+    const test_squares_2 = makeMove(
+      test_squares,
+      start,
+      end,
+      passantPos
+    ).slice();
     // en passant helper
     var passant_pos_after = 65;
     if (

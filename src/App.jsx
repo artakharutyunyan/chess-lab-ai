@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header/Header";
 import { Game } from "./components/Game/index";
@@ -13,12 +13,12 @@ function App() {
   return (
     <>
       <Header />
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route exact path="/champions" component={ChampionsList} />
-        <Route path="/game" component={Game} />
-        <Route component={PageNotFound} />
-      </Switch>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/champions" element={<ChampionsList />} />
+        <Route path="/game" element={<Game />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
       <ToastContainer autoClose={2000} hideProgressBar />
     </>
   );
