@@ -1,0 +1,45 @@
+/* Design tokens. A warm, neutral palette (avoids pure black/white) with the
+   chess board's green as the shared accent across both themes. */
+:root {
+  --color-bg: #f5f4f1;
+  --color-surface: #ffffff;
+  --color-surface-alt: #ebe9e3;
+  --color-text: #1d1d1b;
+  --color-text-muted: #6f6f68;
+  --color-border: #e3e1da;
+
+  --color-accent: #6b8e4e;
+  --color-accent-hover: #55713d;
+  --color-accent-contrast: #ffffff;
+
+  --color-header-bg: #1c1b19;
+  --color-header-text: #eeece6;
+  --color-header-text-muted: #c9c7bd;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-heading: Georgia, "Times New Roman", serif;
+}
+
+[data-theme="dark"] {
+  --color-bg: #141412;
+  --color-surface: #1e1e1b;
+  --color-surface-alt: #26251f;
+  --color-text: #eeece6;
+  --color-text-muted: #a3a199;
+  --color-border: #2c2b27;
+
+  --color-accent: #8fb56c;
+  --color-accent-hover: #a3c586;
+  --color-accent-contrast: #14150f;
+
+  --color-header-bg: #0d0d0c;
+  --color-header-text: #eeece6;
+  --color-header-text-muted: #b8b5ab;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+}

@@ -157,8 +157,9 @@ test("chooseBotMove skips the avoided move when another option exists", () => {
   squares[9] = new Pawn("b"); // b7, blocks that escape square (own piece)
   squares[60] = new King("w"); // e1, uninvolved
 
-  // Only two legal king moves exist from a8: a7 (index 8) and b8 (index 1).
-  // Excluding a7 should force b8, deterministically, regardless of eval.
+  // a8 -> a7 is one of several legal moves available to black (the king
+  // also has a8->b8, and the pawn has its own pushes); excluding it should
+  // never surface as the chosen move.
   const avoidMove = { start: 0, end: 8 };
 
   const move = chooseBotMove({
@@ -169,5 +170,6 @@ test("chooseBotMove skips the avoided move when another option exists", () => {
     avoidMove,
   });
 
-  expect(move).toEqual({ start: 0, end: 1 });
+  expect(move).not.toBeNull();
+  expect(move).not.toEqual(avoidMove);
 });

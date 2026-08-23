@@ -1,51 +1,65 @@
-.flex {
+.champions-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.champions-title {
+  text-align: center;
+  color: var(--color-text);
+  margin: 0 0 16px 0;
+}
+
+.champions-intro {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.champions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.champion-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-h1 {
   text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-p {
-  font-size: 20px;
-  text-align: center;
+.champion-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-.wrapper {
-  flex-wrap: wrap;
-  justify-content: center;
+.champion-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  background-color: var(--color-surface-alt);
+  margin-bottom: 14px;
 }
 
-@media (min-width: 768px) {
-  .wrapper {
-    display: flex;
-    justify-content: space-between;
-  }
+.champion-name {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 15px;
 }
 
-.date-and-img {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0px;
-  font-size: 18px;
-  word-break: break-all;
-  width: 270px;
-}
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  height: 70px;
-}
-
-.img {
-  height: 220px;
-  width: 220px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.champion-date {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 2px;
 }

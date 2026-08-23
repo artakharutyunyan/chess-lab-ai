@@ -5,12 +5,7 @@ export const en = {
       worldChampions: "World champions",
       play: "Play",
       changeLanguage: "Change language",
-    },
-    home: {
-      title: "World of Chess",
-      subtitle:
-        "Play chess against the computer, explore the world champions, and enjoy the game in your language.",
-      cta: "Play Now",
+      toggleTheme: "Toggle dark mode",
     },
     notFound: {
       title: "Oops! Page not found.",

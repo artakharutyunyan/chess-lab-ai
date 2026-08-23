@@ -79,26 +79,6 @@
   animation: bounceInDown 1.3s;
 }
 
-/* unvisited link */
-a:link {
-  color: #242424;
-}
-
-/* visited link */
-a:visited {
-  color: #242424;
-}
-
-/* mouse over link */
-a:hover {
-  color: #00a25f;
-}
-
-/* selected link */
-a:active {
-  color: #00a25f;
-}
-
 .right_screen {
   position: relative;
   display: inline-block;
@@ -147,28 +127,28 @@ a:active {
   display: inline-block;
   outline: none !important;
   width: 45%;
-  background-color: #deeaee;
+  background-color: var(--color-surface-alt);
   padding: 0 15px 5px;
   border-top-right-radius: 0px;
   border-top-left-radius: 3px;
-  color: #242424;
+  color: var(--color-text);
   text-align: center;
 }
 
 .black_player_color {
-  background-color: #242424;
-  color: white;
+  background-color: #1c1b19;
+  color: #eeece6;
   border-top-right-radius: 3px;
   border-top-left-radius: 0px;
 }
 
 .highlight_box {
   width: 45%;
-  background-color: #769656;
+  background-color: var(--color-accent);
   padding: 0 20px 5px;
   padding-right: 50px;
   padding-bottom: 8px;
-  color: white;
+  color: var(--color-accent-contrast);
   text-align: center;
   margin-bottom: 20px;
 }
@@ -176,10 +156,10 @@ a:active {
 .side_box {
   width: 65%;
   box-sizing: border-box;
-  background-color: #ffffff;
-  color: #242424;
+  background-color: var(--color-surface);
+  color: var(--color-text);
   border-radius: 3px;
-  border: 1px solid #232621;
+  border: 1px solid var(--color-border);
   position: relative;
   top: calc(50% - 41vmin);
   left: 13%;
@@ -237,17 +217,17 @@ a:active {
   width: 35%;
   cursor: pointer;
   outline: none;
-  color: white;
-  background-color: #769656;
+  color: var(--color-accent-contrast);
+  background-color: var(--color-accent);
   border: none;
   border-radius: 5px;
   font-size: 0.8em;
-  transition: background-color 0.5s;
+  transition: background-color 0.2s ease;
   margin-bottom: 0px;
   margin-top: 5px;
   margin-right: 10px;
-  font-family: "Raleway", sans-serif;
-  font-weight: 300;
+  font-family: var(--font-body);
+  font-weight: 500;
 }
 
 .button_font {
@@ -261,11 +241,16 @@ a:active {
 }
 
 .reset_button:hover {
-  background-color: #9aaf84;
+  background-color: var(--color-accent-hover);
 }
 
 .reset_button:active {
   transform: translateY(1px);
+}
+
+.reset_button:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
 }
 
 .table {
