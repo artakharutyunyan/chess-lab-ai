@@ -3,9 +3,17 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
+import { ThemeProvider } from "./context/ThemeContext";
+import { BoardSettingsProvider } from "./context/BoardSettingsContext";
+import "./theme.css";
+import "./index.css";
 
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <ThemeProvider>
+    <BoardSettingsProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </BoardSettingsProvider>
+  </ThemeProvider>
 );

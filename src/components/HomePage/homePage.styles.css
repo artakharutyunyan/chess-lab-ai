@@ -1,6 +1,6 @@
 .background {
   width: 100%;
-  min-height: calc(100vh - 71px);
+  min-height: calc(100vh - 56px);
   background-image: url("../../images/chesswallpaperl.jpg");
   background-position: center;
   background-repeat: no-repeat;
@@ -8,44 +8,4 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.hero {
-  max-width: 640px;
-  text-align: center;
-  padding: 40px 24px;
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 8px;
-}
-
-.hero-title {
-  color: #fff;
-  font-size: 42px;
-  margin: 0 0 16px 0;
-}
-
-.hero-subtitle {
-  color: #ececea;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 0 0 28px 0;
-}
-
-.hero-cta {
-  display: inline-block;
-  background-color: #769656;
-  color: #fff;
-  text-decoration: none;
-  font-size: 18px;
-  font-weight: bold;
-  padding: 12px 32px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.hero-cta:hover,
-.hero-cta:focus {
-  background-color: #5d7a43;
-  color: #fff;
-  text-decoration: none;
 }

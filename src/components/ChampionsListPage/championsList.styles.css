@@ -1,51 +1,80 @@
-.flex {
+.champions-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.champions-title {
+  text-align: center;
+  color: var(--color-text);
+  margin: 0 0 16px 0;
+}
+
+.champions-intro {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 17px;
+  line-height: 1.47;
+}
+
+.champions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.champion-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-h1 {
   text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: border-color 0.15s ease;
 }
 
-p {
-  font-size: 20px;
-  text-align: center;
+.champion-card:hover {
+  border-color: var(--color-accent);
 }
 
-.wrapper {
-  flex-wrap: wrap;
-  justify-content: center;
+.champion-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-alt);
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-product);
+  display: block;
+  transition: opacity 0.15s ease;
 }
 
-@media (min-width: 768px) {
-  .wrapper {
-    display: flex;
-    justify-content: space-between;
-  }
+.champion-card a {
+  display: block;
+  outline: none;
+  border-radius: var(--radius-sm);
 }
 
-.date-and-img {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0px;
-  font-size: 18px;
-  word-break: break-all;
-  width: 270px;
-}
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  height: 70px;
+.champion-card a:hover .champion-photo {
+  opacity: 0.85;
 }
 
-.img {
-  height: 220px;
-  width: 220px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.champion-card a:focus-visible .champion-photo {
+  box-shadow: var(--shadow-product), 0 0 0 2px var(--color-accent);
+}
+
+.champion-name {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.champion-date {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 2px;
 }

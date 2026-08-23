@@ -1,19 +1,88 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Game } from "./index";
+import { BoardSettingsProvider } from "../../context/BoardSettingsContext";
+
+function renderGame() {
+  return render(
+    <BoardSettingsProvider>
+      <Game />
+    </BoardSettingsProvider>
+  );
+}
 
 test("renders the initial 32-piece position", () => {
-  render(<Game />);
-  expect(screen.getAllByRole("img")).toHaveLength(32);
+  renderGame();
+  const occupied = screen
+    .getAllByRole("gridcell")
+    .filter((cell) => /white|black/i.test(cell.getAttribute("aria-label") ?? ""));
+  expect(occupied).toHaveLength(32);
 });
 
 test("clicking a white pawn highlights its legal destination squares", async () => {
   const user = userEvent.setup();
-  const { container } = render(<Game />);
-  const squares = container.querySelectorAll(".table button.square");
+  renderGame();
 
-  await user.click(squares[52]); // e2
+  await user.click(screen.getByRole("button", { name: /start game/i }));
+  await user.click(screen.getByRole("gridcell", { name: /^e2,/ }));
 
-  expect(squares[44].className).toMatch(/highlighted/); // e3
-  expect(squares[36].className).toMatch(/highlighted/); // e4
+  const e3 = screen.getByRole("gridcell", { name: "e3" });
+  const e4 = screen.getByRole("gridcell", { name: "e4" });
+  expect(e3.querySelector(".play-legal-mark")).not.toBeNull();
+  expect(e4.querySelector(".play-legal-mark")).not.toBeNull();
+});
+
+test("keyboard: arrow keys move the roving cursor, Enter selects and moves", async () => {
+  const user = userEvent.setup();
+  renderGame();
+
+  await user.click(screen.getByRole("button", { name: /start game/i }));
+
+  // a8 (top-left) starts as the sole tab stop.
+  const a8 = screen.getByRole("gridcell", { name: /^a8,/ });
+  expect(a8).toHaveAttribute("tabIndex", "0");
+  a8.focus();
+  expect(a8).toHaveFocus();
+
+  // Down 6 times: a8 -> a2 (white's pawn rank).
+  for (let i = 0; i < 6; i++) {
+    await user.keyboard("{ArrowDown}");
+  }
+  const a2 = screen.getByRole("gridcell", { name: /^a2,/ });
+  expect(a2).toHaveFocus();
+  expect(a2).toHaveAttribute("tabIndex", "0");
+  expect(a8).toHaveAttribute("tabIndex", "-1");
+
+  // Right once: a2 -> b2, then Right again: b2 -> c2 (both empty in terms
+  // of the destination -- moving the cursor doesn't select anything).
+  await user.keyboard("{ArrowRight}{ArrowRight}");
+  const c2 = screen.getByRole("gridcell", { name: /^c2,/ });
+  expect(c2).toHaveFocus();
+
+  // Enter selects the pawn on c2; its legal targets (c3/c4) should light up.
+  await user.keyboard("{Enter}");
+  expect(screen.getByRole("gridcell", { name: "c3" }).querySelector(".play-legal-mark")).not.toBeNull();
+  expect(screen.getByRole("gridcell", { name: "c4" }).querySelector(".play-legal-mark")).not.toBeNull();
+
+  // Move the cursor up to c4 and press Space to complete the move.
+  await user.keyboard("{ArrowUp}{ArrowUp}");
+  await user.keyboard(" ");
+  expect(screen.getByRole("gridcell", { name: /^c4, white pawn$/i })).toBeInTheDocument();
+});
+
+test("keyboard: f flips the board", async () => {
+  const user = userEvent.setup();
+  renderGame();
+  await user.click(screen.getByRole("button", { name: /start game/i }));
+
+  const a8 = screen.getByRole("gridcell", { name: /^a8,/ });
+  a8.focus();
+  await user.keyboard("f");
+
+  // Flipped, the visual top-left square (still the roving cursor's
+  // position) is h1 instead of a8, and keyboard focus should have moved
+  // there with it (not silently dropped by the remount under a new key).
+  const h1 = screen.getByRole("gridcell", { name: /^h1,/ });
+  expect(h1).toHaveAttribute("tabIndex", "0");
+  expect(h1).toHaveFocus();
 });

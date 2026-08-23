@@ -9,36 +9,18 @@ import {
   isStalemate,
   isCheckmate,
 } from "./engine/rules";
-import { chooseBotMove } from "./engine/ai";
+import { chooseBotMove, DIFFICULTY_PRESETS } from "./engine/ai";
+import { TYPE_BY_LETTER } from "./pieceSets";
+import PlayBoard from "./PlayBoard";
+import PlayPanel from "./PlayPanel";
+import PlaySetup from "./PlaySetup";
+import { buildMoveRows, lookupOpeningName } from "./notation";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
 import checkFlash from "./sfx/Check_Flash.mp3";
 import move from "./sfx/Move.mp3";
 import stalemate from "./sfx/Stalemate.mp3";
 import whiteDefeat from "./sfx/White_Defeat.mp3";
-
-// return a square with the chess piece
-function Square(props) {
-  if (props.value != null) {
-    return (
-      <button
-        className={"square " + props.color + props.corner + props.cursor}
-        onClick={props.onClick}
-      >
-        {props.value.icon}
-      </button>
-    );
-  } else {
-    return (
-      <button
-        className={"square " + props.color + props.corner + props.cursor}
-        onClick={props.onClick}
-      >
-        {" "}
-      </button>
-    );
-  }
-}
 
 export class Board extends React.Component {
   // initialize the board
@@ -77,7 +59,46 @@ export class Board extends React.Component {
       check_flash: false,
       viewing_history: false,
       just_clicked: false,
+      board_flipped: false,
+      game_id: 0,
+      game_started: false,
+      human_player: "w",
+      time_control_ms: 10 * 60 * 1000,
+      difficulty: "medium",
     };
+  }
+
+  flipBoard() {
+    this.setState({ board_flipped: !this.state.board_flipped });
+  }
+
+  setHumanPlayer(color) {
+    if (this.state.game_started) return;
+    this.setState({ human_player: color });
+  }
+
+  setTimeControlMs(ms) {
+    if (this.state.game_started) return;
+    this.setState({ time_control_ms: ms });
+  }
+
+  setDifficulty(level) {
+    if (this.state.game_started) return;
+    this.setState({ difficulty: level });
+  }
+
+  startGame() {
+    if (this.state.game_started) return;
+    this.setState({
+      game_started: true,
+      board_flipped: this.state.human_player === "b",
+    });
+    if (this.state.human_player === "b") {
+      // bot plays white and moves first
+      setTimeout(() => {
+        this.execute_bot(this.state.squares);
+      }, 300);
+    }
   }
 
   // bundle the castling-rights slice of state into the shape rules.js
@@ -95,9 +116,10 @@ export class Board extends React.Component {
 
   // reset the board
   reset() {
+    const botColor = this.state.human_player === "w" ? "b" : "w";
     if (
       this.state.history_num - 1 === this.state.turn_num &&
-      this.state.turn === "b" &&
+      this.state.turn === botColor &&
       !this.state.mated
     )
       return;
@@ -122,8 +144,8 @@ export class Board extends React.Component {
       pieces_collected_by_black: [],
       history: [initializeBoard()],
       history_num: 1,
-      history_h1: [0],
-      history_h2: [0],
+      history_h1: [null],
+      history_h2: [null],
       history_h3: [null],
       history_h4: [null],
       history_white_collection: [null],
@@ -134,6 +156,8 @@ export class Board extends React.Component {
       check_flash: false,
       viewing_history: false,
       just_clicked: false,
+      game_id: this.state.game_id + 1,
+      game_started: false,
     });
   }
 
@@ -203,7 +227,7 @@ export class Board extends React.Component {
         ? this.state.pieces_collected_by_white.slice()
         : this.state.pieces_collected_by_black.slice();
     if (copy_squares[end].ascii != null) {
-      collection.push(<Collected value={copy_squares[end]} />);
+      collection.push(copy_squares[end].ascii);
       this.setState({
         capture_made: true,
       });
@@ -212,11 +236,11 @@ export class Board extends React.Component {
       if (end - start === (player === "w" ? -9 : 7)) {
         // black going down to the left OR white going up to the left
         if (start - 1 === this.state.passant_pos)
-          collection.push(<Collected value={copy_squares[start - 1]} />);
+          collection.push(copy_squares[start - 1].ascii);
       } else if (end - start === (player === "w" ? -7 : 9)) {
         // black going down to the right OR white going up to the right
         if (start + 1 === this.state.passant_pos)
-          collection.push(<Collected value={copy_squares[start + 1]} />);
+          collection.push(copy_squares[start + 1].ascii);
       }
     }
 
@@ -299,6 +323,8 @@ export class Board extends React.Component {
       (isStalemate("b", copy_squares, passantPos, castlingRights) &&
         player === "w");
 
+    const botColor = this.state.human_player === "w" ? "b" : "w";
+
     this.setState({
       passant_pos: passant,
       history: copy_history,
@@ -315,15 +341,19 @@ export class Board extends React.Component {
       mated: check_mated || stale_mated ? true : false,
       turn: player === "b" ? "w" : "b",
       true_turn: player === "b" ? "w" : "b",
-      bot_running: player === "b" ? 0 : 1,
+      bot_running: player === this.state.human_player ? 1 : 0,
       move_made: true,
     });
 
     // set state
-    if (player === "b") {
+    if (player === botColor) {
       this.setState({
         first_pos: start,
         second_pos: end,
+      });
+    }
+    if (player === "b") {
+      this.setState({
         pieces_collected_by_black: collection,
       });
     } else {
@@ -333,9 +363,12 @@ export class Board extends React.Component {
     }
   }
 
-  // Chess bot for black player
-  execute_bot(depth, passed_in_squares) {
+  // Chess bot for whichever color isn't the human player
+  execute_bot(passed_in_squares) {
     if (this.state.mated) return;
+
+    const botColor = this.state.human_player === "w" ? "b" : "w";
+    const { maxDepth, timeBudgetMs } = DIFFICULTY_PRESETS[this.state.difficulty];
 
     const avoidMove =
       this.state.repetition >= 2
@@ -345,16 +378,18 @@ export class Board extends React.Component {
     // board evaluation using mini_max algorithm by looking at future turns
     const chosen = chooseBotMove({
       squares: passed_in_squares,
-      depth,
+      maxDepth,
+      timeBudgetMs,
       passantPos: this.state.passant_pos,
       castlingRights: this.getCastlingRights(),
       avoidMove,
+      botColor,
     });
 
-    // chosen === null indicates that black is in checkmate/stalemate
+    // chosen === null indicates that the bot is in checkmate/stalemate
     if (chosen == null) return;
 
-    // increment this.state.repetition if black keeps moving a piece back and forth consecutively
+    // increment this.state.repetition if the bot keeps moving a piece back and forth consecutively
     if (
       chosen.start === this.state.second_pos &&
       chosen.end === this.state.first_pos
@@ -369,7 +404,7 @@ export class Board extends React.Component {
     }
 
     this.execute_move(
-      "b",
+      botColor,
       passed_in_squares.slice(),
       chosen.start,
       chosen.end
@@ -381,6 +416,9 @@ export class Board extends React.Component {
     let copy_squares = this.state.squares.slice();
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
+    const humanPlayer = this.state.human_player;
+
+    if (!this.state.game_started) return;
 
     if (this.state.history_num - 1 !== this.state.turn_num) {
       return;
@@ -404,7 +442,7 @@ export class Board extends React.Component {
           viewing_history: false,
         });
 
-        copy_squares = clear_check_highlight(copy_squares, "w").slice();
+        copy_squares = clear_check_highlight(copy_squares, humanPlayer).slice();
         copy_squares[i].highlight = 1; // highlight selected piece
 
         // highlight legal moves
@@ -456,10 +494,11 @@ export class Board extends React.Component {
           // out of check
           if (
             i !== this.state.source &&
-            inCheck("w", copy_squares, passantPos, castlingRights) === true
+            inCheck(humanPlayer, copy_squares, passantPos, castlingRights) === true
           ) {
+            const humanKingAscii = humanPlayer === "w" ? "k" : "K";
             for (let j = 0; j < 64; j++) {
-              if (copy_squares[j].ascii === "k") {
+              if (copy_squares[j].ascii === humanKingAscii) {
                 copy_squares[j].in_check = 1;
                 break;
               }
@@ -475,7 +514,7 @@ export class Board extends React.Component {
           return;
         }
 
-        this.execute_move("w", copy_squares, this.state.source, i);
+        this.execute_move(humanPlayer, copy_squares, this.state.source, i);
 
         setTimeout(() => {
           this.setState({
@@ -484,10 +523,9 @@ export class Board extends React.Component {
           });
         }, 200);
 
-        // chess bot for black player
-        let search_depth = 3;
+        // chess bot for whichever color isn't the human player
         setTimeout(() => {
-          this.execute_bot(search_depth, this.state.squares);
+          this.execute_bot(this.state.squares);
         }, 700);
       }
     }
@@ -498,85 +536,47 @@ export class Board extends React.Component {
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
 
-    const row_nums = [];
-    for (let i = 8; i > 0; i--) {
-      row_nums.push(<Label key={i} value={i} />);
-    }
-    const col_nums = [];
-    for (let i = 1; i < 9; i++) {
-      let letter;
-      switch (i) {
-        case 1:
-          letter = "A";
-          break;
-        case 2:
-          letter = "B";
-          break;
-        case 3:
-          letter = "C";
-          break;
-        case 4:
-          letter = "D";
-          break;
-        case 5:
-          letter = "E";
-          break;
-        case 6:
-          letter = "F";
-          break;
-        case 7:
-          letter = "G";
-          break;
-        case 8:
-          letter = "H";
-          break;
-        default:
-          letter = "";
-          break;
+    const lastMoveSquares = [
+      this.state.history_h1[this.state.history_num - 1],
+      this.state.history_h2[this.state.history_num - 1],
+    ].filter((idx) => idx != null);
+
+    const selectedSquare = this.state.source > -1 ? this.state.source : null;
+
+    const legalTargets = [];
+    for (let j = 0; j < 64; j++) {
+      if (this.state.squares[j].possible === 1) {
+        const targetPiece = this.state.squares[j];
+        const sourcePiece =
+          selectedSquare != null ? this.state.squares[selectedSquare] : null;
+        const sourceIsPawn =
+          sourcePiece != null &&
+          (sourcePiece.ascii === "p" || sourcePiece.ascii === "P");
+        // A pawn only ever legally moves diagonally to capture -- an empty
+        // diagonal target is therefore always an en passant capture.
+        const diagonalPawnMove =
+          sourceIsPawn && selectedSquare != null && j % 8 !== selectedSquare % 8;
+        legalTargets.push({
+          index: j,
+          capture: targetPiece.ascii != null || diagonalPawnMove,
+        });
       }
-      col_nums.push(<Label key={letter} value={letter} />);
     }
 
-    const board = [];
-    for (let i = 0; i < 8; i++) {
-      const squareRows = [];
-      for (let j = 0; j < 8; j++) {
-        let square_corner = null;
-        if (i === 0 && j === 0) {
-          square_corner = " top_left_square ";
-        } else if (i === 0 && j === 7) {
-          square_corner = " top_right_square ";
-        } else if (i === 7 && j === 0) {
-          square_corner = " bottom_left_square ";
-        } else if (i === 7 && j === 7) {
-          square_corner = " bottom_right_square ";
-        } else {
-          square_corner = " ";
-        }
-
-        const copy_squares = this.state.squares.slice();
-        let square_color = calc_squareColor(i, j, copy_squares);
-        let square_cursor = "pointer";
-        if (copy_squares[i * 8 + j].player !== "w") square_cursor = "default";
-        if (this.state.bot_running === 1 && !this.state.mated)
-          square_cursor = "bot_running";
-        if (this.state.mated) square_cursor = "default";
-        if (this.state.history_num - 1 !== this.state.turn_num)
-          square_cursor = "not_allowed";
-
-        squareRows.push(
-          <Square
-            key={i * 8 + j}
-            value={copy_squares[i * 8 + j]}
-            color={square_color}
-            corner={square_corner}
-            cursor={square_cursor}
-            onClick={() => this.handleClick(i * 8 + j)}
-          />
-        );
-      }
-      board.push(<div key={i}>{squareRows}</div>);
+    let checkSquare = null;
+    if (inCheck("w", this.state.squares, passantPos, castlingRights)) {
+      checkSquare = this.state.squares.findIndex((sq) => sq.ascii === "k");
+    } else if (inCheck("b", this.state.squares, passantPos, castlingRights)) {
+      checkSquare = this.state.squares.findIndex((sq) => sq.ascii === "K");
     }
+
+    const movablePlayer =
+      this.state.game_started &&
+      !this.state.mated &&
+      this.state.bot_running === 0 &&
+      this.state.history_num - 1 === this.state.turn_num
+        ? this.state.human_player
+        : null;
 
     let black_mated = isCheckmate(
       "b",
@@ -598,6 +598,35 @@ export class Board extends React.Component {
         this.state.turn === "w") ||
       (isStalemate("b", this.state.squares, passantPos, castlingRights) &&
         this.state.turn === "b");
+
+    const capturedByWhite = this.state.pieces_collected_by_white
+      .map((ascii) => TYPE_BY_LETTER[ascii.toLowerCase()])
+      .filter(Boolean);
+    const capturedByBlack = this.state.pieces_collected_by_black
+      .map((ascii) => TYPE_BY_LETTER[ascii.toLowerCase()])
+      .filter(Boolean);
+
+    const moveRows = buildMoveRows(
+      this.state.history,
+      this.state.history_h1,
+      this.state.history_h2,
+      passantPos,
+      castlingRights
+    );
+    const openingName = lookupOpeningName(moveRows);
+    const currentMoveIndex = this.state.history_num - 1;
+
+    const activePlayer =
+      !this.state.game_started || this.state.mated || !not_history
+        ? null
+        : this.state.turn;
+
+    let resultText = null;
+    if (not_history) {
+      if (white_mated) resultText = this.props.t("game.blackWins");
+      else if (black_mated) resultText = this.props.t("game.whiteWins");
+      else if (stale) resultText = this.props.t("game.stalemateResult");
+    }
 
     return (
       <div>
@@ -635,111 +664,56 @@ export class Board extends React.Component {
             </div>
           )}
 
-        <div className="bounceInDown">
-          <div className="left_screen bounceInDown">
-            <div className="side_box">
-              <div className="wrapper">
-                <div className="player_box">
-                  <span className="medium_font"> {this.props.t("game.white")}</span>
-                  {this.state.pieces_collected_by_white}
-                </div>
-                <div className="player_box black_player_color">
-                  <span className="medium_font">{this.props.t("game.black")}</span>
-                  {this.state.pieces_collected_by_black}
-                </div>
-              </div>
-              <div className="wrapper">
-                {this.state.turn === "w" ? (
-                  <div className="highlight_box"></div>
-                ) : (
-                  <div className="highlight_box transparent"></div>
-                )}
-                {this.state.turn === "b" ? (
-                  <div className="highlight_box"></div>
-                ) : (
-                  <div className="highlight_box transparent"></div>
-                )}
-              </div>
-
-              <div className="button_wrapper">
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("back_atw")}
-                >
-                  <span className="button_font">&lt;&lt;</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("back")}
-                >
-                  <span className="button_font">&lt;</span>
-                </button>
-                <button className="reset_button" onClick={() => this.reset()}>
-                  <span className="button_font">{this.props.t("game.restart")}</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("next")}
-                >
-                  <span className="button_font">&gt;</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("next_atw")}
-                >
-                  <span className="button_font">&gt;&gt;</span>
-                </button>
-              </div>
-
-              <div className="mate_wrapper">
-                <p className="small_font">
-                  {inCheck("w", this.state.squares, passantPos, castlingRights) &&
-                  !white_mated === true
-                    ? this.props.t("game.check")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {inCheck("b", this.state.squares, passantPos, castlingRights) &&
-                  !black_mated === true
-                    ? this.props.t("game.check")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {white_mated === true ? this.props.t("game.lost") : ""}
-                </p>
-                <p className="small_font">
-                  {black_mated === true ? this.props.t("game.won") : ""}
-                </p>
-                <p className="small_font">
-                  {(isStalemate(
-                    "w",
-                    this.state.squares,
-                    passantPos,
-                    castlingRights
-                  ) &&
-                    this.state.turn === "w") === true
-                    ? this.props.t("game.stalemate")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {(isStalemate(
-                    "b",
-                    this.state.squares,
-                    passantPos,
-                    castlingRights
-                  ) &&
-                    this.state.turn === "b") === true
-                    ? this.props.t("game.stalemate")
-                    : ""}
-                </p>
-              </div>
-            </div>
+        <div className="board-page bounceInDown">
+          <div className="bounceInDown">
+            <PlayBoard
+              squares={this.state.squares}
+              selected={selectedSquare}
+              legalTargets={legalTargets}
+              lastMoveSquares={lastMoveSquares}
+              checkSquare={checkSquare}
+              movablePlayer={movablePlayer}
+              flipped={this.state.board_flipped}
+              onSquareClick={(i) => this.handleClick(i)}
+              onFlip={() => this.flipBoard()}
+              onStepBack={() => this.viewHistory("back")}
+              onStepForward={() => this.viewHistory("next")}
+            />
           </div>
 
-          <div className="right_screen bounceInDown">
-            <div className="row_label"> {row_nums} </div>
-            <div className="table"> {board} </div>
-            <div className="col_label"> {col_nums} </div>
+          <div className="bounceInDown">
+            {this.state.game_started ? (
+              <PlayPanel
+                capturedByWhite={capturedByWhite}
+                capturedByBlack={capturedByBlack}
+                moveRows={moveRows}
+                currentMoveIndex={currentMoveIndex}
+                openingName={openingName}
+                activePlayer={activePlayer}
+                clockResetToken={this.state.game_id}
+                initialClockMs={this.state.time_control_ms}
+                resultText={resultText}
+                whiteLabel={this.props.t("game.white")}
+                blackLabel={this.props.t("game.black")}
+                humanPlayer={this.state.human_player}
+                onFirst={() => this.viewHistory("back_atw")}
+                onPrev={() => this.viewHistory("back")}
+                onNext={() => this.viewHistory("next")}
+                onLast={() => this.viewHistory("next_atw")}
+                onFlip={() => this.flipBoard()}
+                onRestart={() => this.reset()}
+              />
+            ) : (
+              <PlaySetup
+                humanPlayer={this.state.human_player}
+                timeControlMs={this.state.time_control_ms}
+                difficulty={this.state.difficulty}
+                onSelectHumanPlayer={(color) => this.setHumanPlayer(color)}
+                onSelectTimeControl={(ms) => this.setTimeControlMs(ms)}
+                onSelectDifficulty={(level) => this.setDifficulty(level)}
+                onStart={() => this.startGame()}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -750,10 +724,11 @@ export class Board extends React.Component {
   viewHistory(direction) {
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
+    const botColor = this.state.human_player === "w" ? "b" : "w";
 
     if (
       this.state.history_num - 1 === this.state.turn_num &&
-      this.state.turn === "b" &&
+      this.state.turn === botColor &&
       !this.state.mated
     ) {
       return;
@@ -864,51 +839,6 @@ export class Board extends React.Component {
   }
 }
 
-// Helper Functions for Render ===========================
-// return the color of a square for the chess board
-function calc_squareColor(i, j, squares) {
-  let square_color =
-    (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-      ? "white_square"
-      : "black_square";
-  if (squares[i * 8 + j].highlight === 1) {
-    square_color =
-      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-        ? "selected_white_square"
-        : "selected_black_square";
-  }
-  if (squares[i * 8 + j].possible === 1) {
-    square_color =
-      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-        ? "highlighted_white_square"
-        : "highlighted_black_square";
-  }
-  if (
-    squares[i * 8 + j].ascii != null &&
-    squares[i * 8 + j].ascii.toLowerCase() === "k"
-  ) {
-    if (squares[i * 8 + j].in_check === 1) {
-      square_color =
-        (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-          ? "in_check_square_white"
-          : "in_check_square_black";
-    }
-    if (squares[i * 8 + j].checked >= 1) {
-      square_color =
-        squares[i * 8 + j].checked === 1 ? "checked_square" : "stale_square";
-    }
-  }
-  return square_color;
-}
-// return labels for axes of the board
-function Label(props) {
-  return <button className={"label"}> {props.value} </button>;
-}
-// helper function to help generate arrays of pieces captured by a player
-function Collected(props) {
-  return <button className={"collected"}> {props.value.icon} </button>;
-}
-
 // Helper Functions to Handle Square Highlighting ========
 // highlight king if in checkmate/stalemate
 function highlight_mate(player, squares, check_mated, stale_mated) {
@@ -961,10 +891,4 @@ function clear_check_highlight(squares, player) {
     }
   }
   return copy_squares;
-}
-
-// Miscellaneous Functions ===============================
-// return if value is odd
-function isOdd(value) {
-  return value % 2 !== 0;
 }

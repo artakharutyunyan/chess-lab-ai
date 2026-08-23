@@ -1,0 +1,97 @@
+/* Design tokens, adapted from an Apple.com design-system analysis
+   (colors, type, radius scale, "flat except one product shadow"
+   elevation, single-accent button grammar). The page-composition
+   pattern (alternating full-bleed product tiles) isn't replicated --
+   it's a marketing-site structure that doesn't map onto this app's
+   single-purpose utility screens -- but the token language does. */
+:root {
+  --color-bg: #f5f5f7; /* Apple's "parchment" canvas */
+  --color-surface: #ffffff;
+  --color-surface-alt: #fafafc; /* pearl */
+  --color-text: #1d1d1f; /* ink */
+  --color-text-muted: #6e6e73;
+  --color-border: #e0e0e0; /* hairline */
+
+  --color-accent: #0066cc; /* Action Blue */
+  --color-accent-hover: #0071e3; /* Focus Blue, reused as the hover/press shade */
+  --color-accent-contrast: #ffffff;
+
+  /* The global nav is true black in both themes -- Apple's one
+     deliberate use of pure black -- so its tokens live outside the
+     light/dark split below. Sky Link Blue is the accent reserved for
+     this permanently-dark surface. */
+  --color-header-bg: #000000;
+  --color-header-text: #ffffff;
+  --color-header-text-muted: #86868b;
+  --color-header-accent: #2997ff;
+
+  /* Reserved for the one true shadow in the system (product/portrait
+     imagery) and for floating overlays (the language popup) -- never
+     for cards or buttons. */
+  --shadow-product: 3px 5px 30px rgba(0, 0, 0, 0.22);
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+
+  --font-body: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto",
+    "Helvetica", "Arial", sans-serif;
+  --font-heading: var(--font-body);
+
+  /* Play page + shared header, per docs/PLAY-PAGE-SPEC.md. Scoped to this
+     one page and the header on purpose -- everything else keeps using the
+     --color-* tokens above. */
+  --page-bg: #f4f3ee;
+  --header-bg: #fbfaf6;
+  --border: #e4e2d8;
+  --text: #23261f;
+  --text-muted: #70746a;
+  --sq-dark: #6e8c4f;
+  --sq-light: #edefd6;
+  --coord-on-dark: #f3f5e4;
+  --coord-on-light: #4c6633;
+  --panel-bg: #252a23;
+  --panel-bg-2: #2d332b;
+  --panel-line: rgba(255, 255, 255, 0.08);
+  --panel-text: #eceee6;
+  --panel-muted: #98a092;
+  --accent: #e0a63f;
+
+  --font-ui: "Familjen Grotesk", "Helvetica Neue", "Arial", sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg: #141414;
+  --color-surface: #1c1c1e;
+  --color-surface-alt: #232325;
+  --color-text: #f5f5f7;
+  --color-text-muted: #9a9a9e;
+  --color-border: #313133;
+
+  --color-accent: #2997ff; /* Sky Link Blue -- Action Blue would be too low-contrast here */
+  --color-accent-hover: #5cb2ff;
+  --color-accent-contrast: #0a0a0a;
+
+  --shadow-product: 3px 5px 30px rgba(0, 0, 0, 0.5);
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --page-bg: #121517;
+  --header-bg: #191d20;
+  --border: #2a2f33;
+  --text: #e9ebe6;
+  --text-muted: #8d948c;
+  --sq-dark: #5c7844;
+  --sq-light: #d5d9bb;
+  --coord-on-dark: #e6ead3;
+  --coord-on-light: #3e5528;
+  --panel-bg: #242a2d;
+  --panel-bg-2: #2e3538;
+  --panel-line: rgba(255, 255, 255, 0.07);
+  --panel-text: #e9ebe6;
+  --panel-muted: #8d948c;
+  --accent: #e0a63f;
+}

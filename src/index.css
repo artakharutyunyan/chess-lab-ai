@@ -1,5 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
-  background-color: #ececea;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+a {
+  color: var(--color-accent);
+}
+a:hover {
+  color: var(--color-accent-hover);
 }

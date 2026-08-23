@@ -8,4 +8,42 @@ import "@testing-library/jest-dom";
 // "lng" cookie is set, which jsdom never has).
 import { i18n } from "./i18n";
 
+// Under this Node/jsdom combination, window.localStorage comes back
+// undefined in tests (Node's own experimental localStorage global shadows
+// jsdom's and needs a --localstorage-file flag we don't want to depend on).
+// ThemeContext needs a working localStorage, so polyfill a minimal one.
+if (typeof window !== "undefined" && !window.localStorage) {
+  class MemoryStorage implements Storage {
+    private store = new Map<string, string>();
+    get length() {
+      return this.store.size;
+    }
+    clear() {
+      this.store.clear();
+    }
+    getItem(key: string) {
+      return this.store.has(key) ? this.store.get(key)! : null;
+    }
+    key(index: number) {
+      return Array.from(this.store.keys())[index] ?? null;
+    }
+    removeItem(key: string) {
+      this.store.delete(key);
+    }
+    setItem(key: string, value: string) {
+      this.store.set(key, String(value));
+    }
+  }
+  Object.defineProperty(window, "localStorage", {
+    value: new MemoryStorage(),
+    writable: true,
+  });
+}
+
+// jsdom doesn't implement scrollIntoView (there's no real layout to scroll);
+// PlayPanel calls it to keep the current move visible in the move list.
+if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function scrollIntoView() {};
+}
+
 await i18n.changeLanguage("en");

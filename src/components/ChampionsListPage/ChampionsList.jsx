@@ -7,21 +7,29 @@ import { useTranslation } from "react-i18next";
 function ChampionsList() {
   const { t } = useTranslation();
   return (
-    <div className="container">
-      <div className="flex">
-        <h1>{t("championsList.header")}</h1>
-        <p>{t("championsList.text")}</p>
-        <div className="wrapper">
-          {champions.map((champion) => (
-            <div key={champion.id} className="date-and-img">
-              <div className="header">
-                <div>{t(champion.name)}</div>
-                <div>{champion.date}</div>
-              </div>
-              <img src={champion.img} alt={t(champion.name)} className="img" />
-            </div>
-          ))}
-        </div>
+    <div className="champions-page">
+      <h1 className="champions-title">{t("championsList.header")}</h1>
+      <p className="champions-intro">{t("championsList.text")}</p>
+      <div className="champions-grid">
+        {champions.map((champion, index) => (
+          <div key={champion.id} className="champion-card">
+            <a
+              href={champion.wiki}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(champion.name)}
+            >
+              <img
+                src={champion.img}
+                alt={t(champion.name)}
+                className="champion-photo"
+                loading={index < 4 ? "eager" : "lazy"}
+              />
+            </a>
+            <div className="champion-name">{t(champion.name)}</div>
+            <div className="champion-date">{champion.date}</div>
+          </div>
+        ))}
       </div>
     </div>
   );

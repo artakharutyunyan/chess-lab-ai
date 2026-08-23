@@ -1,0 +1,148 @@
+/* Pre-game setup screen, shown in place of the panel until the player
+   presses Start. Reuses .play-panel's dark card shell (playPanel.styles.css)
+   for visual consistency with the in-game panel. */
+
+.play-setup {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.play-setup-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.play-setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.play-setup-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--panel-muted);
+  margin: 0;
+}
+
+.play-setup-time-grid,
+.play-setup-difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.play-setup-chip {
+  padding: 10px 8px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--panel-bg-2);
+  color: var(--panel-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.play-setup-chip:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.play-setup-chip--selected {
+  background-color: var(--accent);
+  color: #1d2018;
+  font-weight: 600;
+}
+
+.play-setup-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.play-setup-side-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.play-setup-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--panel-bg-2);
+  color: var(--panel-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.play-setup-side:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.play-setup-side--selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.play-setup-side:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--panel-bg-2), 0 0 0 4px var(--accent);
+}
+
+.play-setup-side-glyph {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-setup-side-glyph--white {
+  background-color: #eceee6;
+  color: #1d2018;
+}
+
+.play-setup-side-glyph--black {
+  background-color: #1d2018;
+  color: #eceee6;
+}
+
+.play-setup-start {
+  margin-top: auto;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--accent);
+  color: #1d2018;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.play-setup-start:hover {
+  background-color: #e6b358;
+}
+
+.play-setup-start:active {
+  transform: scale(0.98);
+}
+
+.play-setup-start:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent);
+}
