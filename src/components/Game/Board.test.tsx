@@ -13,16 +13,20 @@ function renderGame() {
 
 test("renders the initial 32-piece position", () => {
   renderGame();
-  expect(screen.getAllByRole("img")).toHaveLength(32);
+  const occupied = screen
+    .getAllByRole("gridcell")
+    .filter((cell) => /white|black/.test(cell.getAttribute("aria-label") ?? ""));
+  expect(occupied).toHaveLength(32);
 });
 
 test("clicking a white pawn highlights its legal destination squares", async () => {
   const user = userEvent.setup();
-  const { container } = renderGame();
-  const squares = container.querySelectorAll(".table button.square");
+  renderGame();
 
-  await user.click(squares[52]); // e2
+  await user.click(screen.getByRole("gridcell", { name: /^e2,/ }));
 
-  expect(squares[44].className).toMatch(/highlighted/); // e3
-  expect(squares[36].className).toMatch(/highlighted/); // e4
+  const e3 = screen.getByRole("gridcell", { name: "e3" });
+  const e4 = screen.getByRole("gridcell", { name: "e4" });
+  expect(e3.querySelector(".play-legal-mark")).not.toBeNull();
+  expect(e4.querySelector(".play-legal-mark")).not.toBeNull();
 });

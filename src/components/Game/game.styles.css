@@ -88,13 +88,6 @@
   padding: 32px 24px 48px;
 }
 
-.right_screen {
-  position: relative;
-  display: inline-block;
-  height: 100%;
-  width: 50%;
-}
-
 .left_screen {
   position: static;
   float: none;
@@ -263,189 +256,22 @@
   outline-offset: 2px;
 }
 
-.table {
-  position: absolute;
-  top: calc(50% - 42vmin);
-  left: calc(50% - 46vmin);
-  width: 80vmin;
-  height: 80vmin;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 0px 15px 0 rgba(0, 0, 0, 0.19);
-  border-radius: 5px;
-}
-
-.square {
-  outline: none !important;
-  border: none;
-  border-width: 0px;
-  float: left;
-  height: 10vmin;
-  width: 10vmin;
-  transition: background-color 0.7s;
-  -webkit-transition: background-color 0.7s;
-}
-
-.pointer {
-  cursor: pointer;
-}
-
-.not_allowed {
-  cursor: not-allowed;
-}
-
-.default {
-  cursor: default;
-}
-
-.bot_running {
-  cursor: progress;
-}
-
-.label {
-  outline: none !important;
-  background-color: transparent;
-  color: #769656;
-  border: none;
-  font-size: 120%;
-  height: 10vmin;
-  width: 10vmin;
-}
-
-.row_label {
-  outline: none !important;
-  position: relative;
-  top: calc(50% - 42vmin);
-  left: calc(50% - 55vmin);
-  width: 10vmin;
-  height: 80vmin;
-}
-
-.col_label {
-  outline: none !important;
-  position: relative;
-  top: calc(50% - 43vmin);
-  left: calc(50% - 46vmin);
-  width: 80vmin;
-  height: 10vmin;
-}
-
 .piece {
   height: 60%;
   width: auto;
 }
 
-.white_square {
-  background-color: var(--board-light, #eeeed2);
-}
-.black_square {
-  background-color: var(--board-dark, #769656);
-}
-
-.top_left_square {
-  border-radius: 8px 0px 0px 0px;
-}
-
-.top_right_square {
-  border-radius: 0px 8px 0px 0px;
-}
-
-.bottom_left_square {
-  border-radius: 0px 0px 0px 8px;
-}
-
-.bottom_right_square {
-  border-radius: 0px 0px 8px 0px;
-}
-
-.selected_white_square {
-  background-color: #00e686;
-}
-
-.selected_black_square {
-  background-color: #00c070;
-}
-
-.highlighted_white_square {
-  background-color: #94fffe;
-}
-
-.highlighted_black_square {
-  background-color: #77e1d7;
-}
-
-.in_check_square_white {
-  animation: flash-white 0.5s;
-  background-color: #deeaee;
-}
-
-.in_check_square_black {
-  animation: flash-black 0.5s;
-  background-color: #034f84;
-}
-
-.checked_square {
-  background-color: #ff4233;
-}
-
-@-webkit-keyframes flash-white {
-  from,
-  50%,
-  to {
-    background-color: #ff4233;
-  }
-
-  25%,
-  75% {
-    background-color: #deeaee;
-  }
-}
-
-@-webkit-keyframes flash-black {
-  from,
-  50%,
-  to {
-    background-color: #ff4233;
-  }
-
-  25%,
-  75% {
-    background-color: #034f84;
-  }
-}
-
-.stale_square {
-  background-color: #ffac2c;
-}
-
+/* The mobile layout itself (per docs/PLAY-PAGE-SPEC.md) is a later pass;
+   this just keeps the sidebar from overflowing narrow viewports until then. */
 @media screen and (max-width: 1100px) {
   .board-page {
     padding: 24px 16px 40px;
     gap: 20px;
   }
 
-  .right_screen {
-    width: 100%;
-    height: 100vmin;
-    margin-left: 5px;
-  }
-
   .left_screen {
     flex: 1 1 100%;
     width: 100%;
     max-width: 420px;
-  }
-
-  .row_label {
-    top: calc(50% - 42vmin);
-    left: calc(50% - 52vmin);
-  }
-
-  .col_label {
-    top: calc(50% - 42vmin);
-    left: calc(50% - 42vmin);
-  }
-
-  .table {
-    top: calc(50% - 42vmin);
-    left: calc(50% - 42vmin);
   }
 }

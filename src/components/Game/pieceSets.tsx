@@ -63,7 +63,7 @@ export const PIECE_SETS: PieceSetOption[] = [
 
 export const DEFAULT_PIECE_SET_ID: PieceSetId = "classic";
 
-const TYPE_BY_LETTER: Record<string, PieceType> = {
+export const TYPE_BY_LETTER: Record<string, PieceType> = {
   k: "king",
   q: "queen",
   r: "rook",

@@ -40,6 +40,28 @@
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
   --font-heading: var(--font-body);
+
+  /* Play page + shared header, per docs/PLAY-PAGE-SPEC.md. Scoped to this
+     one page and the header on purpose -- everything else keeps using the
+     --color-* tokens above. */
+  --page-bg: #f4f3ee;
+  --header-bg: #fbfaf6;
+  --border: #e4e2d8;
+  --text: #23261f;
+  --text-muted: #70746a;
+  --sq-dark: #6e8c4f;
+  --sq-light: #edefd6;
+  --coord-on-dark: #f3f5e4;
+  --coord-on-light: #4c6633;
+  --panel-bg: #252a23;
+  --panel-bg-2: #2d332b;
+  --panel-line: rgba(255, 255, 255, 0.08);
+  --panel-text: #eceee6;
+  --panel-muted: #98a092;
+  --accent: #e0a63f;
+
+  --font-ui: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", Menlo, monospace;
 }
 
 [data-theme="dark"] {
@@ -56,4 +78,20 @@
 
   --shadow-product: 3px 5px 30px rgba(0, 0, 0, 0.5);
   --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --page-bg: #121517;
+  --header-bg: #191d20;
+  --border: #2a2f33;
+  --text: #e9ebe6;
+  --text-muted: #8d948c;
+  --sq-dark: #5c7844;
+  --sq-light: #d5d9bb;
+  --coord-on-dark: #e6ead3;
+  --coord-on-light: #3e5528;
+  --panel-bg: #242a2d;
+  --panel-bg-2: #2e3538;
+  --panel-line: rgba(255, 255, 255, 0.07);
+  --panel-text: #e9ebe6;
+  --panel-muted: #8d948c;
+  --accent: #e0a63f;
 }

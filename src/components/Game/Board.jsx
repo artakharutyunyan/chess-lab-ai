@@ -11,6 +11,7 @@ import {
 } from "./engine/rules";
 import { chooseBotMove } from "./engine/ai";
 import { getPieceIcon } from "./pieceSets";
+import PlayBoard from "./PlayBoard";
 import { useBoardSettings } from "../../context/BoardSettingsContext";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
@@ -18,30 +19,6 @@ import checkFlash from "./sfx/Check_Flash.mp3";
 import move from "./sfx/Move.mp3";
 import stalemate from "./sfx/Stalemate.mp3";
 import whiteDefeat from "./sfx/White_Defeat.mp3";
-
-// return a square with the chess piece
-function Square(props) {
-  const { pieceSetId } = useBoardSettings();
-  if (props.value != null) {
-    return (
-      <button
-        className={"square " + props.color + props.corner + props.cursor}
-        onClick={props.onClick}
-      >
-        {getPieceIcon(props.value.ascii, pieceSetId)}
-      </button>
-    );
-  } else {
-    return (
-      <button
-        className={"square " + props.color + props.corner + props.cursor}
-        onClick={props.onClick}
-      >
-        {" "}
-      </button>
-    );
-  }
-}
 
 export class Board extends React.Component {
   // initialize the board
@@ -501,85 +478,46 @@ export class Board extends React.Component {
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
 
-    const row_nums = [];
-    for (let i = 8; i > 0; i--) {
-      row_nums.push(<Label key={i} value={i} />);
-    }
-    const col_nums = [];
-    for (let i = 1; i < 9; i++) {
-      let letter;
-      switch (i) {
-        case 1:
-          letter = "A";
-          break;
-        case 2:
-          letter = "B";
-          break;
-        case 3:
-          letter = "C";
-          break;
-        case 4:
-          letter = "D";
-          break;
-        case 5:
-          letter = "E";
-          break;
-        case 6:
-          letter = "F";
-          break;
-        case 7:
-          letter = "G";
-          break;
-        case 8:
-          letter = "H";
-          break;
-        default:
-          letter = "";
-          break;
+    const lastMoveSquares = [
+      this.state.history_h1[this.state.history_num - 1],
+      this.state.history_h2[this.state.history_num - 1],
+    ].filter((idx) => idx != null);
+
+    const selectedSquare = this.state.source > -1 ? this.state.source : null;
+
+    const legalTargets = [];
+    for (let j = 0; j < 64; j++) {
+      if (this.state.squares[j].possible === 1) {
+        const targetPiece = this.state.squares[j];
+        const sourcePiece =
+          selectedSquare != null ? this.state.squares[selectedSquare] : null;
+        const sourceIsPawn =
+          sourcePiece != null &&
+          (sourcePiece.ascii === "p" || sourcePiece.ascii === "P");
+        // A pawn only ever legally moves diagonally to capture -- an empty
+        // diagonal target is therefore always an en passant capture.
+        const diagonalPawnMove =
+          sourceIsPawn && selectedSquare != null && j % 8 !== selectedSquare % 8;
+        legalTargets.push({
+          index: j,
+          capture: targetPiece.ascii != null || diagonalPawnMove,
+        });
       }
-      col_nums.push(<Label key={letter} value={letter} />);
     }
 
-    const board = [];
-    for (let i = 0; i < 8; i++) {
-      const squareRows = [];
-      for (let j = 0; j < 8; j++) {
-        let square_corner = null;
-        if (i === 0 && j === 0) {
-          square_corner = " top_left_square ";
-        } else if (i === 0 && j === 7) {
-          square_corner = " top_right_square ";
-        } else if (i === 7 && j === 0) {
-          square_corner = " bottom_left_square ";
-        } else if (i === 7 && j === 7) {
-          square_corner = " bottom_right_square ";
-        } else {
-          square_corner = " ";
-        }
-
-        const copy_squares = this.state.squares.slice();
-        let square_color = calc_squareColor(i, j, copy_squares);
-        let square_cursor = "pointer";
-        if (copy_squares[i * 8 + j].player !== "w") square_cursor = "default";
-        if (this.state.bot_running === 1 && !this.state.mated)
-          square_cursor = "bot_running";
-        if (this.state.mated) square_cursor = "default";
-        if (this.state.history_num - 1 !== this.state.turn_num)
-          square_cursor = "not_allowed";
-
-        squareRows.push(
-          <Square
-            key={i * 8 + j}
-            value={copy_squares[i * 8 + j]}
-            color={square_color}
-            corner={square_corner}
-            cursor={square_cursor}
-            onClick={() => this.handleClick(i * 8 + j)}
-          />
-        );
-      }
-      board.push(<div key={i}>{squareRows}</div>);
+    let checkSquare = null;
+    if (inCheck("w", this.state.squares, passantPos, castlingRights)) {
+      checkSquare = this.state.squares.findIndex((sq) => sq.ascii === "k");
+    } else if (inCheck("b", this.state.squares, passantPos, castlingRights)) {
+      checkSquare = this.state.squares.findIndex((sq) => sq.ascii === "K");
     }
+
+    const movablePlayer =
+      !this.state.mated &&
+      this.state.bot_running === 0 &&
+      this.state.history_num - 1 === this.state.turn_num
+        ? "w"
+        : null;
 
     let black_mated = isCheckmate(
       "b",
@@ -739,10 +677,16 @@ export class Board extends React.Component {
             </div>
           </div>
 
-          <div className="right_screen bounceInDown">
-            <div className="row_label"> {row_nums} </div>
-            <div className="table"> {board} </div>
-            <div className="col_label"> {col_nums} </div>
+          <div className="bounceInDown">
+            <PlayBoard
+              squares={this.state.squares}
+              selected={selectedSquare}
+              legalTargets={legalTargets}
+              lastMoveSquares={lastMoveSquares}
+              checkSquare={checkSquare}
+              movablePlayer={movablePlayer}
+              onSquareClick={(i) => this.handleClick(i)}
+            />
           </div>
         </div>
       </div>
@@ -868,45 +812,6 @@ export class Board extends React.Component {
 }
 
 // Helper Functions for Render ===========================
-// return the color of a square for the chess board
-function calc_squareColor(i, j, squares) {
-  let square_color =
-    (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-      ? "white_square"
-      : "black_square";
-  if (squares[i * 8 + j].highlight === 1) {
-    square_color =
-      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-        ? "selected_white_square"
-        : "selected_black_square";
-  }
-  if (squares[i * 8 + j].possible === 1) {
-    square_color =
-      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-        ? "highlighted_white_square"
-        : "highlighted_black_square";
-  }
-  if (
-    squares[i * 8 + j].ascii != null &&
-    squares[i * 8 + j].ascii.toLowerCase() === "k"
-  ) {
-    if (squares[i * 8 + j].in_check === 1) {
-      square_color =
-        (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
-          ? "in_check_square_white"
-          : "in_check_square_black";
-    }
-    if (squares[i * 8 + j].checked >= 1) {
-      square_color =
-        squares[i * 8 + j].checked === 1 ? "checked_square" : "stale_square";
-    }
-  }
-  return square_color;
-}
-// return labels for axes of the board
-function Label(props) {
-  return <button className={"label"}> {props.value} </button>;
-}
 // helper function to help generate arrays of pieces captured by a player
 function Collected(props) {
   const { pieceSetId } = useBoardSettings();
@@ -970,10 +875,4 @@ function clear_check_highlight(squares, player) {
     }
   }
   return copy_squares;
-}
-
-// Miscellaneous Functions ===============================
-// return if value is odd
-function isOdd(value) {
-  return value % 2 !== 0;
 }
