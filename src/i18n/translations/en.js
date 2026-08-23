@@ -6,6 +6,25 @@ export const en = {
       play: "Play",
       changeLanguage: "Change language",
       toggleTheme: "Toggle dark mode",
+      board: "Board",
+    },
+    boardSettings: {
+      title: "Board settings",
+      intro: "Choose how your board and pieces look. Your picks are saved on this device.",
+      colorsHeading: "Board colors",
+      pieceStyleHeading: "Piece style",
+      themes: {
+        classicGreen: "Classic Green",
+        oceanBlue: "Ocean Blue",
+        walnutBrown: "Walnut Brown",
+        charcoalGray: "Charcoal Gray",
+        coralSunset: "Coral Sunset",
+      },
+      pieceSets: {
+        classic: "Classic",
+        minimal: "Minimal",
+        bold: "Bold",
+      },
     },
     notFound: {
       title: "Oops! Page not found.",

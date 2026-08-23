@@ -67,6 +67,9 @@ function Header() {
           <Link to="/game" className="header-link">
             {t("header.play")}
           </Link>
+          <Link to="/board" className="header-link">
+            {t("header.board")}
+          </Link>
         </nav>
 
         <div className="header-controls">

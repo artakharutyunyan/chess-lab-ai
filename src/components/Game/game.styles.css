@@ -324,10 +324,10 @@
 }
 
 .white_square {
-  background-color: #eeeed2;
+  background-color: var(--board-light, #eeeed2);
 }
 .black_square {
-  background-color: #769656;
+  background-color: var(--board-dark, #769656);
 }
 
 .top_left_square {

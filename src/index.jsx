@@ -4,13 +4,16 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
+import { BoardSettingsProvider } from "./context/BoardSettingsContext";
 import "./theme.css";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
   <ThemeProvider>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <BoardSettingsProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </BoardSettingsProvider>
   </ThemeProvider>
 );

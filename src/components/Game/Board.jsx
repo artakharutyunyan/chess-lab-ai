@@ -10,6 +10,8 @@ import {
   isCheckmate,
 } from "./engine/rules";
 import { chooseBotMove } from "./engine/ai";
+import { getPieceIcon } from "./pieceSets";
+import { useBoardSettings } from "../../context/BoardSettingsContext";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
 import checkFlash from "./sfx/Check_Flash.mp3";
@@ -19,13 +21,14 @@ import whiteDefeat from "./sfx/White_Defeat.mp3";
 
 // return a square with the chess piece
 function Square(props) {
+  const { pieceSetId } = useBoardSettings();
   if (props.value != null) {
     return (
       <button
         className={"square " + props.color + props.corner + props.cursor}
         onClick={props.onClick}
       >
-        {props.value.icon}
+        {getPieceIcon(props.value.ascii, pieceSetId)}
       </button>
     );
   } else {
@@ -906,7 +909,13 @@ function Label(props) {
 }
 // helper function to help generate arrays of pieces captured by a player
 function Collected(props) {
-  return <button className={"collected"}> {props.value.icon} </button>;
+  const { pieceSetId } = useBoardSettings();
+  return (
+    <button className={"collected"}>
+      {" "}
+      {getPieceIcon(props.value.ascii, pieceSetId)}{" "}
+    </button>
+  );
 }
 
 // Helper Functions to Handle Square Highlighting ========

@@ -6,6 +6,25 @@ export const am = {
       play: "Խաղալ",
       changeLanguage: "Փոխել լեզուն",
       toggleTheme: "Փոխել թեման",
+      board: "Տախտակ",
+    },
+    boardSettings: {
+      title: "Տախտակի կարգավորումներ",
+      intro: "Ընտրեք ձեր տախտակի և խաղաքարերի տեսքը: Ձեր ընտրությունը պահպանվում է այս սարքում:",
+      colorsHeading: "Տախտակի գույներ",
+      pieceStyleHeading: "Խաղաքարերի ոճ",
+      themes: {
+        classicGreen: "Դասական կանաչ",
+        oceanBlue: "Օվկիանոսի կապույտ",
+        walnutBrown: "Ընկուզի շագանակագույն",
+        charcoalGray: "Մուգ մոխրագույն",
+        coralSunset: "Մարջանագույն մայրամուտ",
+      },
+      pieceSets: {
+        classic: "Դասական",
+        minimal: "Մինիմալ",
+        bold: "Համարձակ",
+      },
     },
     notFound: {
       title: "Վայ՜ Էջը չի գտնվել:",

@@ -6,6 +6,25 @@ export const ru = {
       play: "Играть",
       changeLanguage: "Изменить язык",
       toggleTheme: "Переключить тёмную тему",
+      board: "Доска",
+    },
+    boardSettings: {
+      title: "Настройки доски",
+      intro: "Выберите внешний вид доски и фигур. Ваш выбор сохраняется на этом устройстве.",
+      colorsHeading: "Цвета доски",
+      pieceStyleHeading: "Стиль фигур",
+      themes: {
+        classicGreen: "Классический зелёный",
+        oceanBlue: "Океанский синий",
+        walnutBrown: "Ореховый коричневый",
+        charcoalGray: "Угольно-серый",
+        coralSunset: "Коралловый закат",
+      },
+      pieceSets: {
+        classic: "Классический",
+        minimal: "Минимальный",
+        bold: "Смелый",
+      },
     },
     notFound: {
       title: "Ой! Страница не найдена.",
