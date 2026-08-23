@@ -19,6 +19,23 @@
   box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
 }
 
+/* Matches .play-board's mobile breakpoint in playBoard.styles.css -- once
+   the board shrinks to fit the viewport, the panel (used for both the
+   in-game panel and the pre-game PlaySetup screen) goes fluid-width and
+   grows to fit its content instead of the desktop's fixed square height. */
+@media screen and (max-width: 1100px) {
+  .play-panel {
+    width: 100%;
+    max-width: min(704px, calc(100vw - 32px));
+    height: auto;
+  }
+
+  .play-movelist {
+    flex: none;
+    max-height: 240px;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

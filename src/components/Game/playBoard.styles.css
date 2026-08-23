@@ -1,6 +1,4 @@
-/* Board component per docs/PLAY-PAGE-SPEC.md. Desktop square size only for
-   now -- mobile (48px squares, no coordinate-gutter changes needed since
-   coordinates already live inside the squares) lands in a later pass. */
+/* Board component per docs/PLAY-PAGE-SPEC.md. */
 
 .play-board {
   --sq-size: 88px;
@@ -13,6 +11,16 @@
   overflow: hidden;
   box-shadow: 0 28px 70px -34px rgba(35, 38, 31, 0.5);
   flex-shrink: 0;
+}
+
+/* Below this width the board and panel stack into a single column (see
+   .board-page in game.styles.css) -- shrink squares to fit the viewport
+   instead of overflowing it. Coordinates already live inside the squares,
+   so no gutter layout changes are needed at the smaller size. */
+@media screen and (max-width: 1100px) {
+  .play-board {
+    --sq-size: min(88px, calc((100vw - 32px) / 8));
+  }
 }
 
 [data-theme="dark"] .play-board {
