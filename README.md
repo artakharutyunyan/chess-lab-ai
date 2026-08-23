@@ -1,68 +1,72 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# World of Chess
 
-## Available Scripts
+A chess app built with React: play against a configurable AI opponent, browse the
+history of World Chess Champions, and customize how the board and pieces look.
+Available in English, Russian, and Armenian, with light and dark themes.
 
-In the project directory, you can run:
+![Play page](docs/screenshots/play-page.jpg)
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Play against the computer** — click, drag-and-drop, or full keyboard control
+  (arrow keys move a cursor, Enter/Space selects and moves, modified arrows step
+  through history, `f` flips the board). Choose your side, a time control from
+  1 minute to 2 hours, and one of three difficulty levels before starting.
+- **Three difficulty levels** — the engine is a minimax search with alpha-beta
+  pruning and MVV-LVA move ordering, run as iterative deepening within a
+  per-level time budget: Easy (no lookahead), Medium, and Hard (deeper search,
+  bounded to stay responsive). See `src/components/Game/engine/ai.ts`.
+  Real-time clocks, full move history with algebraic notation, captured-piece
+  tracking, and board flipping are all part of the Play page.
+- **World Champions** — a gallery of every undisputed World Chess Champion from
+  Wilhelm Steinitz to the present, each linking out to their Wikipedia article.
+- **Board customization** — five board color pairings and three piece styles
+  (a classic set, plus two original minimal/bold sets), saved to your device.
+- **Light and dark themes**, remembered across visits.
+- **Internationalized** — English, Russian, and Armenian.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Getting started
 
-### `npm test`
+```bash
+npm install
+npm run dev      # start the dev server (Vite)
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Other scripts:
 
-### `npm run build`
+```bash
+npm test          # run the test suite once (Vitest)
+npm run test:watch  # run tests in watch mode
+npm run build      # production build
+npm run preview     # preview the production build locally
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Tech stack
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+- [React 19](https://react.dev/) with [React Router](https://reactrouter.com/)
+- [Vite](https://vitejs.dev/) for dev/build tooling
+- TypeScript, adopted incrementally — the chess engine (`src/components/Game/engine`)
+  and newer components are fully typed; some older UI components remain `.jsx`
+- [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/react)
+- [react-i18next](https://react.i18next.com/) for translations
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project structure
 
-### `npm run eject`
+```
+src/
+  components/
+    Game/            # the Play page: board, panel, setup screen, and the AI engine
+      engine/        # pieces, move rules, and the minimax AI -- no UI code
+    BoardSettingsPage/
+    ChampionsListPage/
+    Header/
+    HomePage/
+  context/           # theme and board-settings React context providers
+  i18n/translations/ # en / ru / am
+docs/                # design specs and reference screenshots
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Design docs
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+`docs/PLAY-PAGE-SPEC.md` is the approved design spec the current Play page was
+built against, with reference mockups in `docs/play-page-design/`.
