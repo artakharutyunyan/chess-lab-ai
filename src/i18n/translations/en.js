@@ -4,6 +4,18 @@ export const en = {
       home: "Home",
       worldChampions: "World champions",
       play: "Play",
+      changeLanguage: "Change language",
+    },
+    home: {
+      title: "World of Chess",
+      subtitle:
+        "Play chess against the computer, explore the world champions, and enjoy the game in your language.",
+      cta: "Play Now",
+    },
+    notFound: {
+      title: "Oops! Page not found.",
+      text: "The page you're looking for doesn't exist.",
+      backHome: "Back to Home",
     },
     championsList: {
       header: "The World Champions of Chess",

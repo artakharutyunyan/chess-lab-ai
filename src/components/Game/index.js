@@ -1,5 +1,5 @@
-import { Game as Self } from "./chess";
+import { Board } from "./Board";
 
 import { withTranslation } from "react-i18next";
 
-export const Game = withTranslation()(Self);
+export const Game = withTranslation()(Board);
