@@ -228,7 +228,7 @@ function minimax(
     // en passant helper
     let passant = 65;
     if (
-      test_squares[end].ascii === (is_black_player ? "P" : "p") &&
+      test_squares[start].ascii === (is_black_player ? "P" : "p") &&
       start >= (is_black_player ? 8 : 48) &&
       start <= (is_black_player ? 15 : 55) &&
       end - start === (is_black_player ? 16 : -16)

@@ -52,7 +52,7 @@ npm run preview     # preview the production build locally
 
 ## Project structure
 
-```
+```text
 src/
   components/
     Game/            # the Play page: board, panel, setup screen, and the AI engine

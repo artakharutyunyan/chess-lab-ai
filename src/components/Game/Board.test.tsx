@@ -67,7 +67,7 @@ test("keyboard: arrow keys move the roving cursor, Enter selects and moves", asy
   // Move the cursor up to c4 and press Space to complete the move.
   await user.keyboard("{ArrowUp}{ArrowUp}");
   await user.keyboard(" ");
-  expect(screen.getByRole("gridcell", { name: /^c4,/ })).toBeInTheDocument();
+  expect(screen.getByRole("gridcell", { name: /^c4, white pawn$/i })).toBeInTheDocument();
 });
 
 test("keyboard: f flips the board", async () => {
@@ -80,6 +80,9 @@ test("keyboard: f flips the board", async () => {
   await user.keyboard("f");
 
   // Flipped, the visual top-left square (still the roving cursor's
-  // position) is h1 instead of a8.
-  expect(screen.getByRole("gridcell", { name: /^h1,/ })).toHaveAttribute("tabIndex", "0");
+  // position) is h1 instead of a8, and keyboard focus should have moved
+  // there with it (not silently dropped by the remount under a new key).
+  const h1 = screen.getByRole("gridcell", { name: /^h1,/ });
+  expect(h1).toHaveAttribute("tabIndex", "0");
+  expect(h1).toHaveFocus();
 });

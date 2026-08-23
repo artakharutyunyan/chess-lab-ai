@@ -724,10 +724,11 @@ export class Board extends React.Component {
   viewHistory(direction) {
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
+    const botColor = this.state.human_player === "w" ? "b" : "w";
 
     if (
       this.state.history_num - 1 === this.state.turn_num &&
-      this.state.turn === "b" &&
+      this.state.turn === botColor &&
       !this.state.mated
     ) {
       return;

@@ -64,7 +64,7 @@ export default function PlayBoard({
       return;
     }
     cursorRef.current?.focus();
-  }, [cursor]);
+  }, [cursor, flipped]);
 
   function squareLabel(file: string, rank: number, ascii: string | null): string {
     const coord = `${file}${rank}`;

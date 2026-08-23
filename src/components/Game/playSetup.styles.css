@@ -98,7 +98,7 @@
 
 .play-setup-side:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--panel-bg-2), 0 0 0 4px var(--accent);
 }
 
 .play-setup-side-glyph {
