@@ -19,9 +19,9 @@
     "redux": "^4.0.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -38,5 +38,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }
