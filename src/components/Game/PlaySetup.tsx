@@ -4,20 +4,26 @@ import "./playSetup.styles.css";
 
 const MINUTE_OPTIONS = [1, 2, 3, 5, 10, 15, 30];
 const HOUR_OPTIONS = [1, 2];
+const DIFFICULTY_OPTIONS = ["easy", "medium", "hard"] as const;
+type Difficulty = (typeof DIFFICULTY_OPTIONS)[number];
 
 export interface PlaySetupProps {
   humanPlayer: "w" | "b";
   timeControlMs: number;
+  difficulty: Difficulty;
   onSelectHumanPlayer: (color: "w" | "b") => void;
   onSelectTimeControl: (ms: number) => void;
+  onSelectDifficulty: (level: Difficulty) => void;
   onStart: () => void;
 }
 
 export default function PlaySetup({
   humanPlayer,
   timeControlMs,
+  difficulty,
   onSelectHumanPlayer,
   onSelectTimeControl,
+  onSelectDifficulty,
   onStart,
 }: PlaySetupProps) {
   const { t } = useTranslation();
@@ -61,6 +67,25 @@ export default function PlaySetup({
               </button>
             );
           })}
+        </div>
+      </section>
+
+      <section className="play-setup-section">
+        <h3 className="play-setup-label">{t("game.difficulty")}</h3>
+        <div className="play-setup-difficulty-grid">
+          {DIFFICULTY_OPTIONS.map((level) => (
+            <button
+              type="button"
+              key={level}
+              className={
+                "play-setup-chip" + (difficulty === level ? " play-setup-chip--selected" : "")
+              }
+              onClick={() => onSelectDifficulty(level)}
+              aria-pressed={difficulty === level}
+            >
+              {t(`game.difficulty${level.charAt(0).toUpperCase()}${level.slice(1)}`)}
+            </button>
+          ))}
         </div>
       </section>
 

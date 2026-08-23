@@ -101,7 +101,8 @@ test("chooseBotMove returns null when black has no legal move (checkmate)", () =
 
   const move = chooseBotMove({
     squares,
-    depth: 2,
+    maxDepth: 2,
+    timeBudgetMs: 5000,
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove: null,
@@ -114,7 +115,8 @@ test("chooseBotMove picks a legal move in a simple position", () => {
   const squares = initializeBoard();
   const move = chooseBotMove({
     squares,
-    depth: 1,
+    maxDepth: 1,
+    timeBudgetMs: 5000,
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove: null,
@@ -129,7 +131,8 @@ test("chooseBotMove can play white too (a piece it owns, moving legally)", () =>
   const squares = initializeBoard();
   const move = chooseBotMove({
     squares,
-    depth: 1,
+    maxDepth: 1,
+    timeBudgetMs: 5000,
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove: null,
@@ -182,7 +185,8 @@ test("chooseBotMove skips the avoided move when another option exists", () => {
 
   const move = chooseBotMove({
     squares,
-    depth: 1,
+    maxDepth: 1,
+    timeBudgetMs: 5000,
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove,

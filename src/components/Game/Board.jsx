@@ -9,7 +9,7 @@ import {
   isStalemate,
   isCheckmate,
 } from "./engine/rules";
-import { chooseBotMove } from "./engine/ai";
+import { chooseBotMove, DIFFICULTY_PRESETS } from "./engine/ai";
 import { TYPE_BY_LETTER } from "./pieceSets";
 import PlayBoard from "./PlayBoard";
 import PlayPanel from "./PlayPanel";
@@ -64,6 +64,7 @@ export class Board extends React.Component {
       game_started: false,
       human_player: "w",
       time_control_ms: 10 * 60 * 1000,
+      difficulty: "medium",
     };
   }
 
@@ -81,6 +82,11 @@ export class Board extends React.Component {
     this.setState({ time_control_ms: ms });
   }
 
+  setDifficulty(level) {
+    if (this.state.game_started) return;
+    this.setState({ difficulty: level });
+  }
+
   startGame() {
     if (this.state.game_started) return;
     this.setState({
@@ -90,7 +96,7 @@ export class Board extends React.Component {
     if (this.state.human_player === "b") {
       // bot plays white and moves first
       setTimeout(() => {
-        this.execute_bot(3, this.state.squares);
+        this.execute_bot(this.state.squares);
       }, 300);
     }
   }
@@ -358,10 +364,11 @@ export class Board extends React.Component {
   }
 
   // Chess bot for whichever color isn't the human player
-  execute_bot(depth, passed_in_squares) {
+  execute_bot(passed_in_squares) {
     if (this.state.mated) return;
 
     const botColor = this.state.human_player === "w" ? "b" : "w";
+    const { maxDepth, timeBudgetMs } = DIFFICULTY_PRESETS[this.state.difficulty];
 
     const avoidMove =
       this.state.repetition >= 2
@@ -371,7 +378,8 @@ export class Board extends React.Component {
     // board evaluation using mini_max algorithm by looking at future turns
     const chosen = chooseBotMove({
       squares: passed_in_squares,
-      depth,
+      maxDepth,
+      timeBudgetMs,
       passantPos: this.state.passant_pos,
       castlingRights: this.getCastlingRights(),
       avoidMove,
@@ -516,9 +524,8 @@ export class Board extends React.Component {
         }, 200);
 
         // chess bot for whichever color isn't the human player
-        let search_depth = 3;
         setTimeout(() => {
-          this.execute_bot(search_depth, this.state.squares);
+          this.execute_bot(this.state.squares);
         }, 700);
       }
     }
@@ -697,8 +704,10 @@ export class Board extends React.Component {
               <PlaySetup
                 humanPlayer={this.state.human_player}
                 timeControlMs={this.state.time_control_ms}
+                difficulty={this.state.difficulty}
                 onSelectHumanPlayer={(color) => this.setHumanPlayer(color)}
                 onSelectTimeControl={(ms) => this.setTimeControlMs(ms)}
+                onSelectDifficulty={(level) => this.setDifficulty(level)}
                 onStart={() => this.startGame()}
               />
             )}
