@@ -15,8 +15,8 @@
   margin: 0 auto 40px;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.47;
 }
 
 .board-settings-section {
@@ -44,16 +44,21 @@
   gap: 10px;
   background-color: var(--color-surface);
   border: 2px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+
+.board-theme-option:active,
+.piece-set-option:active {
+  transform: scale(0.97);
 }
 
 .board-theme-option:hover,
 .piece-set-option:hover {
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-text-muted);
 }
 
 .board-theme-option:focus-visible,
@@ -67,13 +72,18 @@
   border-color: var(--color-accent);
 }
 
+.board-theme-option--selected:hover,
+.piece-set-option--selected:hover {
+  border-color: var(--color-accent);
+}
+
 .board-theme-swatch {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   width: 56px;
   height: 56px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--color-border);
 }

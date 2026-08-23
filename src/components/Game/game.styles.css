@@ -130,7 +130,7 @@
   background-color: var(--color-surface-alt);
   padding: 0 15px 5px;
   border-top-right-radius: 0px;
-  border-top-left-radius: 3px;
+  border-top-left-radius: var(--radius-lg);
   color: var(--color-text);
   text-align: center;
 }
@@ -138,7 +138,7 @@
 .black_player_color {
   background-color: #1c1b19;
   color: #eeece6;
-  border-top-right-radius: 3px;
+  border-top-right-radius: var(--radius-lg);
   border-top-left-radius: 0px;
 }
 
@@ -148,6 +148,7 @@
   padding: 0 20px 5px;
   padding-right: 50px;
   padding-bottom: 8px;
+  border-radius: var(--radius-sm);
   color: var(--color-accent-contrast);
   text-align: center;
   margin-bottom: 20px;
@@ -158,7 +159,7 @@
   box-sizing: border-box;
   background-color: var(--color-surface);
   color: var(--color-text);
-  border-radius: 3px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   position: relative;
   top: calc(50% - 41vmin);
@@ -220,14 +221,14 @@
   color: var(--color-accent-contrast);
   background-color: var(--color-accent);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-pill);
   font-size: 0.8em;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
   margin-bottom: 0px;
   margin-top: 5px;
   margin-right: 10px;
   font-family: var(--font-body);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .button_font {
@@ -245,7 +246,7 @@
 }
 
 .reset_button:active {
-  transform: translateY(1px);
+  transform: scale(0.95);
 }
 
 .reset_button:focus-visible {

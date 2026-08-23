@@ -1,5 +1,5 @@
 .not-found-page {
-  min-height: calc(100vh - 71px);
+  min-height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
   align-items: center;

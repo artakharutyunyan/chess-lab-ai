@@ -1,45 +1,59 @@
-/* Design tokens. A warm, neutral palette (avoids pure black/white) with the
-   chess board's green as the shared accent across both themes. */
+/* Design tokens, adapted from an Apple.com design-system analysis
+   (colors, type, radius scale, "flat except one product shadow"
+   elevation, single-accent button grammar). The page-composition
+   pattern (alternating full-bleed product tiles) isn't replicated --
+   it's a marketing-site structure that doesn't map onto this app's
+   single-purpose utility screens -- but the token language does. */
 :root {
-  --color-bg: #f5f4f1;
+  --color-bg: #f5f5f7; /* Apple's "parchment" canvas */
   --color-surface: #ffffff;
-  --color-surface-alt: #ebe9e3;
-  --color-text: #1d1d1b;
-  --color-text-muted: #6f6f68;
-  --color-border: #e3e1da;
+  --color-surface-alt: #fafafc; /* pearl */
+  --color-text: #1d1d1f; /* ink */
+  --color-text-muted: #6e6e73;
+  --color-border: #e0e0e0; /* hairline */
 
-  --color-accent: #6b8e4e;
-  --color-accent-hover: #55713d;
+  --color-accent: #0066cc; /* Action Blue */
+  --color-accent-hover: #0071e3; /* Focus Blue, reused as the hover/press shade */
   --color-accent-contrast: #ffffff;
 
-  --color-header-bg: #1c1b19;
-  --color-header-text: #eeece6;
-  --color-header-text-muted: #c9c7bd;
+  /* The global nav is true black in both themes -- Apple's one
+     deliberate use of pure black -- so its tokens live outside the
+     light/dark split below. Sky Link Blue is the accent reserved for
+     this permanently-dark surface. */
+  --color-header-bg: #000000;
+  --color-header-text: #ffffff;
+  --color-header-text-muted: #86868b;
+  --color-header-accent: #2997ff;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.16);
+  /* Reserved for the one true shadow in the system (product/portrait
+     imagery) and for floating overlays (the language popup) -- never
+     for cards or buttons. */
+  --shadow-product: 3px 5px 30px rgba(0, 0, 0, 0.22);
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
 
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
-  --font-heading: Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-body);
 }
 
 [data-theme="dark"] {
-  --color-bg: #141412;
-  --color-surface: #1e1e1b;
-  --color-surface-alt: #26251f;
-  --color-text: #eeece6;
-  --color-text-muted: #a3a199;
-  --color-border: #2c2b27;
+  --color-bg: #141414;
+  --color-surface: #1c1c1e;
+  --color-surface-alt: #232325;
+  --color-text: #f5f5f7;
+  --color-text-muted: #9a9a9e;
+  --color-border: #313133;
 
-  --color-accent: #8fb56c;
-  --color-accent-hover: #a3c586;
-  --color-accent-contrast: #14150f;
+  --color-accent: #2997ff; /* Sky Link Blue -- Action Blue would be too low-contrast here */
+  --color-accent-hover: #5cb2ff;
+  --color-accent-contrast: #0a0a0a;
 
-  --color-header-bg: #0d0d0c;
-  --color-header-text: #eeece6;
-  --color-header-text-muted: #b8b5ab;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-product: 3px 5px 30px rgba(0, 0, 0, 0.5);
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.5);
 }

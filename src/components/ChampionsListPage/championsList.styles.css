@@ -15,8 +15,8 @@
   margin: 0 auto 40px;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.47;
 }
 
 .champions-grid {
@@ -32,24 +32,23 @@
   text-align: center;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: border-color 0.15s ease;
 }
 
 .champion-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  border-color: var(--color-accent);
 }
 
 .champion-photo {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background-color: var(--color-surface-alt);
   margin-bottom: 14px;
+  box-shadow: var(--shadow-product);
 }
 
 .champion-name {

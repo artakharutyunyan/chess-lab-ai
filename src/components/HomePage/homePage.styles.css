@@ -1,6 +1,6 @@
 .background {
   width: 100%;
-  min-height: calc(100vh - 71px);
+  min-height: calc(100vh - 56px);
   background-image: url("../../images/chesswallpaperl.jpg");
   background-position: center;
   background-repeat: no-repeat;
