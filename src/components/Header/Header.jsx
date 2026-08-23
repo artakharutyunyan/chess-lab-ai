@@ -66,7 +66,7 @@ function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="brand-logo-link" onMouseDown={suppressMouseFocusRing}>
-          <img src={logo} className="brand-logo" alt="World of Chess" />
+          <img src={logo} className="brand-logo" alt="World of Chess" draggable={false} />
         </Link>
 
         <nav className="header-nav">
