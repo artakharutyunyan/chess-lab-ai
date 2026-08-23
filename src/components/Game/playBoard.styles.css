@@ -49,6 +49,14 @@
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35);
 }
 
+.play-square--drag-over {
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+}
+
+.play-piece--dragging {
+  opacity: 0.35;
+}
+
 .play-square-overlay {
   position: absolute;
   inset: 0;
@@ -111,6 +119,15 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+}
+
+/* Movable pieces need to receive their own pointer events for HTML5 drag
+   and drop to initiate (dragstart won't fire through a pointer-events:none
+   ancestor) -- clicks still reach .play-square underneath via bubbling, so
+   click-to-select keeps working exactly as before. */
+.play-square--movable .play-piece {
+  pointer-events: auto;
+  cursor: grab;
 }
 
 .play-piece .piece {

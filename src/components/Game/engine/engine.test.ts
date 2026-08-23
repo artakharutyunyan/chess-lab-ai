@@ -105,6 +105,7 @@ test("chooseBotMove returns null when black has no legal move (checkmate)", () =
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove: null,
+    botColor: "b",
   });
   expect(move).toBeNull();
 });
@@ -117,9 +118,26 @@ test("chooseBotMove picks a legal move in a simple position", () => {
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove: null,
+    botColor: "b",
   });
   expect(move).not.toBeNull();
   if (move == null) throw new Error("expected a move");
+  expect(canMoveThere(move.start, move.end, squares, 65, NO_CASTLE)).toBe(true);
+});
+
+test("chooseBotMove can play white too (a piece it owns, moving legally)", () => {
+  const squares = initializeBoard();
+  const move = chooseBotMove({
+    squares,
+    depth: 1,
+    passantPos: 65,
+    castlingRights: NO_CASTLE,
+    avoidMove: null,
+    botColor: "w",
+  });
+  expect(move).not.toBeNull();
+  if (move == null) throw new Error("expected a move");
+  expect(squares[move.start].player).toBe("w");
   expect(canMoveThere(move.start, move.end, squares, 65, NO_CASTLE)).toBe(true);
 });
 
@@ -168,6 +186,7 @@ test("chooseBotMove skips the avoided move when another option exists", () => {
     passantPos: 65,
     castlingRights: NO_CASTLE,
     avoidMove,
+    botColor: "b",
   });
 
   expect(move).not.toBeNull();

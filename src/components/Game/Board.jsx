@@ -13,6 +13,7 @@ import { chooseBotMove } from "./engine/ai";
 import { TYPE_BY_LETTER } from "./pieceSets";
 import PlayBoard from "./PlayBoard";
 import PlayPanel from "./PlayPanel";
+import PlaySetup from "./PlaySetup";
 import { buildMoveRows, lookupOpeningName } from "./notation";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
@@ -60,11 +61,38 @@ export class Board extends React.Component {
       just_clicked: false,
       board_flipped: false,
       game_id: 0,
+      game_started: false,
+      human_player: "w",
+      time_control_ms: 10 * 60 * 1000,
     };
   }
 
   flipBoard() {
     this.setState({ board_flipped: !this.state.board_flipped });
+  }
+
+  setHumanPlayer(color) {
+    if (this.state.game_started) return;
+    this.setState({ human_player: color });
+  }
+
+  setTimeControlMs(ms) {
+    if (this.state.game_started) return;
+    this.setState({ time_control_ms: ms });
+  }
+
+  startGame() {
+    if (this.state.game_started) return;
+    this.setState({
+      game_started: true,
+      board_flipped: this.state.human_player === "b",
+    });
+    if (this.state.human_player === "b") {
+      // bot plays white and moves first
+      setTimeout(() => {
+        this.execute_bot(3, this.state.squares);
+      }, 300);
+    }
   }
 
   // bundle the castling-rights slice of state into the shape rules.js
@@ -82,9 +110,10 @@ export class Board extends React.Component {
 
   // reset the board
   reset() {
+    const botColor = this.state.human_player === "w" ? "b" : "w";
     if (
       this.state.history_num - 1 === this.state.turn_num &&
-      this.state.turn === "b" &&
+      this.state.turn === botColor &&
       !this.state.mated
     )
       return;
@@ -122,6 +151,7 @@ export class Board extends React.Component {
       viewing_history: false,
       just_clicked: false,
       game_id: this.state.game_id + 1,
+      game_started: false,
     });
   }
 
@@ -287,6 +317,8 @@ export class Board extends React.Component {
       (isStalemate("b", copy_squares, passantPos, castlingRights) &&
         player === "w");
 
+    const botColor = this.state.human_player === "w" ? "b" : "w";
+
     this.setState({
       passant_pos: passant,
       history: copy_history,
@@ -303,15 +335,19 @@ export class Board extends React.Component {
       mated: check_mated || stale_mated ? true : false,
       turn: player === "b" ? "w" : "b",
       true_turn: player === "b" ? "w" : "b",
-      bot_running: player === "b" ? 0 : 1,
+      bot_running: player === this.state.human_player ? 1 : 0,
       move_made: true,
     });
 
     // set state
-    if (player === "b") {
+    if (player === botColor) {
       this.setState({
         first_pos: start,
         second_pos: end,
+      });
+    }
+    if (player === "b") {
+      this.setState({
         pieces_collected_by_black: collection,
       });
     } else {
@@ -321,9 +357,11 @@ export class Board extends React.Component {
     }
   }
 
-  // Chess bot for black player
+  // Chess bot for whichever color isn't the human player
   execute_bot(depth, passed_in_squares) {
     if (this.state.mated) return;
+
+    const botColor = this.state.human_player === "w" ? "b" : "w";
 
     const avoidMove =
       this.state.repetition >= 2
@@ -337,12 +375,13 @@ export class Board extends React.Component {
       passantPos: this.state.passant_pos,
       castlingRights: this.getCastlingRights(),
       avoidMove,
+      botColor,
     });
 
-    // chosen === null indicates that black is in checkmate/stalemate
+    // chosen === null indicates that the bot is in checkmate/stalemate
     if (chosen == null) return;
 
-    // increment this.state.repetition if black keeps moving a piece back and forth consecutively
+    // increment this.state.repetition if the bot keeps moving a piece back and forth consecutively
     if (
       chosen.start === this.state.second_pos &&
       chosen.end === this.state.first_pos
@@ -357,7 +396,7 @@ export class Board extends React.Component {
     }
 
     this.execute_move(
-      "b",
+      botColor,
       passed_in_squares.slice(),
       chosen.start,
       chosen.end
@@ -369,6 +408,9 @@ export class Board extends React.Component {
     let copy_squares = this.state.squares.slice();
     const castlingRights = this.getCastlingRights();
     const passantPos = this.state.passant_pos;
+    const humanPlayer = this.state.human_player;
+
+    if (!this.state.game_started) return;
 
     if (this.state.history_num - 1 !== this.state.turn_num) {
       return;
@@ -392,7 +434,7 @@ export class Board extends React.Component {
           viewing_history: false,
         });
 
-        copy_squares = clear_check_highlight(copy_squares, "w").slice();
+        copy_squares = clear_check_highlight(copy_squares, humanPlayer).slice();
         copy_squares[i].highlight = 1; // highlight selected piece
 
         // highlight legal moves
@@ -444,10 +486,11 @@ export class Board extends React.Component {
           // out of check
           if (
             i !== this.state.source &&
-            inCheck("w", copy_squares, passantPos, castlingRights) === true
+            inCheck(humanPlayer, copy_squares, passantPos, castlingRights) === true
           ) {
+            const humanKingAscii = humanPlayer === "w" ? "k" : "K";
             for (let j = 0; j < 64; j++) {
-              if (copy_squares[j].ascii === "k") {
+              if (copy_squares[j].ascii === humanKingAscii) {
                 copy_squares[j].in_check = 1;
                 break;
               }
@@ -463,7 +506,7 @@ export class Board extends React.Component {
           return;
         }
 
-        this.execute_move("w", copy_squares, this.state.source, i);
+        this.execute_move(humanPlayer, copy_squares, this.state.source, i);
 
         setTimeout(() => {
           this.setState({
@@ -472,7 +515,7 @@ export class Board extends React.Component {
           });
         }, 200);
 
-        // chess bot for black player
+        // chess bot for whichever color isn't the human player
         let search_depth = 3;
         setTimeout(() => {
           this.execute_bot(search_depth, this.state.squares);
@@ -521,10 +564,11 @@ export class Board extends React.Component {
     }
 
     const movablePlayer =
+      this.state.game_started &&
       !this.state.mated &&
       this.state.bot_running === 0 &&
       this.state.history_num - 1 === this.state.turn_num
-        ? "w"
+        ? this.state.human_player
         : null;
 
     let black_mated = isCheckmate(
@@ -565,7 +609,10 @@ export class Board extends React.Component {
     const openingName = lookupOpeningName(moveRows);
     const currentMoveIndex = this.state.history_num - 1;
 
-    const activePlayer = this.state.mated || !not_history ? null : this.state.turn;
+    const activePlayer =
+      !this.state.game_started || this.state.mated || !not_history
+        ? null
+        : this.state.turn;
 
     let resultText = null;
     if (not_history) {
@@ -625,25 +672,36 @@ export class Board extends React.Component {
           </div>
 
           <div className="bounceInDown">
-            <PlayPanel
-              capturedByWhite={capturedByWhite}
-              capturedByBlack={capturedByBlack}
-              moveRows={moveRows}
-              currentMoveIndex={currentMoveIndex}
-              openingName={openingName}
-              activePlayer={activePlayer}
-              clockResetToken={this.state.game_id}
-              initialClockMs={10 * 60 * 1000}
-              resultText={resultText}
-              whiteLabel={this.props.t("game.white")}
-              blackLabel={this.props.t("game.black")}
-              onFirst={() => this.viewHistory("back_atw")}
-              onPrev={() => this.viewHistory("back")}
-              onNext={() => this.viewHistory("next")}
-              onLast={() => this.viewHistory("next_atw")}
-              onFlip={() => this.flipBoard()}
-              onRestart={() => this.reset()}
-            />
+            {this.state.game_started ? (
+              <PlayPanel
+                capturedByWhite={capturedByWhite}
+                capturedByBlack={capturedByBlack}
+                moveRows={moveRows}
+                currentMoveIndex={currentMoveIndex}
+                openingName={openingName}
+                activePlayer={activePlayer}
+                clockResetToken={this.state.game_id}
+                initialClockMs={this.state.time_control_ms}
+                resultText={resultText}
+                whiteLabel={this.props.t("game.white")}
+                blackLabel={this.props.t("game.black")}
+                humanPlayer={this.state.human_player}
+                onFirst={() => this.viewHistory("back_atw")}
+                onPrev={() => this.viewHistory("back")}
+                onNext={() => this.viewHistory("next")}
+                onLast={() => this.viewHistory("next_atw")}
+                onFlip={() => this.flipBoard()}
+                onRestart={() => this.reset()}
+              />
+            ) : (
+              <PlaySetup
+                humanPlayer={this.state.human_player}
+                timeControlMs={this.state.time_control_ms}
+                onSelectHumanPlayer={(color) => this.setHumanPlayer(color)}
+                onSelectTimeControl={(ms) => this.setTimeControlMs(ms)}
+                onStart={() => this.startGame()}
+              />
+            )}
           </div>
         </div>
       </div>

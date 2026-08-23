@@ -196,6 +196,7 @@ export interface PlayPanelProps {
   resultText: string | null;
   whiteLabel: string;
   blackLabel: string;
+  humanPlayer: "w" | "b";
   onFirst: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -216,6 +217,7 @@ export default function PlayPanel({
   resultText,
   whiteLabel,
   blackLabel,
+  humanPlayer,
   onFirst,
   onPrev,
   onNext,
@@ -236,15 +238,32 @@ export default function PlayPanel({
   const currentRow = currentMoveIndex > 0 ? Math.floor((currentMoveIndex - 1) / 2) : -1;
   const currentColor = currentMoveIndex % 2 === 1 ? "white" : "black";
 
+  // Opponent on top, human on the bottom -- matches the board's own
+  // orientation (which flips the same way when playing black).
+  const whiteRow = (
+    <PlayerRow
+      label={whiteLabel}
+      captured={capturedByWhite}
+      materialLead={material > 0 ? material : 0}
+      clockMs={whiteMs}
+      clockRunning={activePlayer === "w"}
+    />
+  );
+  const blackRow = (
+    <PlayerRow
+      label={blackLabel}
+      captured={capturedByBlack}
+      materialLead={material < 0 ? -material : 0}
+      clockMs={blackMs}
+      clockRunning={activePlayer === "b"}
+    />
+  );
+  const topRow = humanPlayer === "w" ? blackRow : whiteRow;
+  const bottomRow = humanPlayer === "w" ? whiteRow : blackRow;
+
   return (
     <div className="play-panel">
-      <PlayerRow
-        label={blackLabel}
-        captured={capturedByBlack}
-        materialLead={material < 0 ? -material : 0}
-        clockMs={blackMs}
-        clockRunning={activePlayer === "b"}
-      />
+      {topRow}
 
       <div className="play-movelist">
         <div className="play-movelist-header">
@@ -286,13 +305,7 @@ export default function PlayPanel({
         </div>
       </div>
 
-      <PlayerRow
-        label={whiteLabel}
-        captured={capturedByWhite}
-        materialLead={material > 0 ? material : 0}
-        clockMs={whiteMs}
-        clockRunning={activePlayer === "w"}
-      />
+      {bottomRow}
 
       <div className="play-controls">
         <div className="play-controls-segment">

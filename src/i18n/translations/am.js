@@ -66,6 +66,12 @@ export const am = {
       nextMove: "Հաջորդ քայլ",
       lastMove: "Վերջին քայլ",
       flipBoard: "Շրջել տախտակը",
+      newGame: "Նոր խաղ",
+      timeControl: "Ժամանակի կարգավորում",
+      playAs: "Խաղալ որպես",
+      start: "Սկսել խաղը",
+      minuteUnit: "րոպե",
+      hourUnit: "ժամ",
     },
   },
 };

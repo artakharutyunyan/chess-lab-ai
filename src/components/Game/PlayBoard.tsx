@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Squares } from "./engine/pieces";
 import { TYPE_BY_LETTER, getPieceIcon } from "./pieceSets";
 import { useBoardSettings } from "../../context/BoardSettingsContext";
@@ -43,6 +44,8 @@ export default function PlayBoard({
   onSquareClick,
 }: PlayBoardProps) {
   const { pieceSetId } = useBoardSettings();
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   return (
     <div className="play-board" role="grid" aria-label="Chess board">
@@ -65,6 +68,7 @@ export default function PlayBoard({
                 "play-square",
                 dark ? "play-square--dark" : "play-square--light",
                 isMovable ? "play-square--movable" : "",
+                dragOverIndex === index ? "play-square--drag-over" : "",
               ]
                 .filter(Boolean)
                 .join(" ");
@@ -76,6 +80,21 @@ export default function PlayBoard({
                   aria-label={squareLabel(file, rank, piece.ascii)}
                   className={className}
                   onClick={() => onSquareClick(index)}
+                  onDragOver={(e) => {
+                    if (draggedIndex == null) return;
+                    e.preventDefault();
+                    if (dragOverIndex !== index) setDragOverIndex(index);
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverIndex === index) setDragOverIndex(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOverIndex(null);
+                    if (draggedIndex == null) return;
+                    if (draggedIndex !== index) onSquareClick(index);
+                    setDraggedIndex(null);
+                  }}
                 >
                   {lastMoveSquares.includes(index) && (
                     <span className="play-square-overlay play-square-overlay--last" aria-hidden="true" />
@@ -97,7 +116,24 @@ export default function PlayBoard({
                     </span>
                   )}
                   {piece.ascii != null && (
-                    <span className="play-piece" aria-hidden="true">
+                    <span
+                      className={`play-piece${draggedIndex === index ? " play-piece--dragging" : ""}`}
+                      aria-hidden="true"
+                      draggable={isMovable}
+                      onDragStart={(e) => {
+                        if (!isMovable) {
+                          e.preventDefault();
+                          return;
+                        }
+                        e.dataTransfer.effectAllowed = "move";
+                        setDraggedIndex(index);
+                        onSquareClick(index);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedIndex(null);
+                        setDragOverIndex(null);
+                      }}
+                    >
                       {getPieceIcon(piece.ascii, pieceSetId)}
                     </span>
                   )}

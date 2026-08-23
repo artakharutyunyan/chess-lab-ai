@@ -23,6 +23,7 @@ test("clicking a white pawn highlights its legal destination squares", async () 
   const user = userEvent.setup();
   renderGame();
 
+  await user.click(screen.getByRole("button", { name: /start game/i }));
   await user.click(screen.getByRole("gridcell", { name: /^e2,/ }));
 
   const e3 = screen.getByRole("gridcell", { name: "e3" });

@@ -1,5 +1,5 @@
 import { canMoveThere, makeMove, type CastlingRights } from "./rules";
-import type { Piece, Squares } from "./pieces";
+import type { Piece, Player, Squares } from "./pieces";
 
 export interface Move {
   start: number;
@@ -239,20 +239,26 @@ export interface ChooseBotMoveArgs {
   passantPos: number;
   castlingRights: CastlingRights;
   avoidMove: Move | null;
+  // Which side the bot is playing. evaluateBlack's score is positive-for-
+  // black/negative-for-white, so a black bot maximizes it and a white bot
+  // minimizes it -- everything below just mirrors on that axis.
+  botColor: Player;
 }
 
-// Choose black's move for the given position by searching `depth` plies
+// Choose the bot's move for the given position by searching `depth` plies
 // ahead with minimax. `avoidMove` (a {start, end} pair), when given, is
 // skipped as a candidate unless it's the only legal move available -- used
 // by the caller to break simple back-and-forth repetition. Returns
-// {start, end}, or null if black has no legal move (checkmate/stalemate).
+// {start, end}, or null if the bot has no legal move (checkmate/stalemate).
 export function chooseBotMove({
   squares,
   depth,
   passantPos,
   castlingRights,
   avoidMove,
+  botColor,
 }: ChooseBotMoveArgs): Move | null {
+  const isBlackBot = botColor === "b";
   const copy_squares = squares.slice();
   let rand_start = 100;
   let rand_end = 100;
@@ -269,9 +275,9 @@ export function chooseBotMove({
   let moves: number[] = [];
   for (let i = 0; i < 64; i++) {
     let start = RA_of_starts[i];
-    let isBlackPiece =
-      copy_squares[start].ascii != null && copy_squares[start].player === "b";
-    if (isBlackPiece) {
+    let isBotPiece =
+      copy_squares[start].ascii != null && copy_squares[start].player === botColor;
+    if (isBotPiece) {
       for (let j = 0; j < 64; j++) {
         let end = RA_of_ends[j];
         if (
@@ -285,9 +291,9 @@ export function chooseBotMove({
     }
   }
 
-  let best_value = -9999;
+  let best_value = isBlackBot ? -9999 : 9999;
   /* iterate through the possible movements and choose the movement from start to end that results in the best
-   * position for black in terms of value calculated by evaluateBlack; minimax algo lets bot look ahead a few
+   * position for the bot in terms of value calculated by evaluateBlack; minimax algo lets bot look ahead a few
    * moves and thereby pick the move that results in the best value in the long run
    */
   for (let i = 0; i < moves.length; i += 2) {
@@ -313,18 +319,23 @@ export function chooseBotMove({
     ).slice();
     // en passant helper
     var passant_pos_after = 65;
+    const botPawnAscii = isBlackBot ? "P" : "p";
+    const botHomeRankMin = isBlackBot ? 8 : 48;
+    const botHomeRankMax = isBlackBot ? 15 : 55;
+    const botDoubleStep = isBlackBot ? 16 : -16;
     if (
-      test_squares[start].ascii === "P" &&
-      start >= 8 &&
-      start <= 15 &&
-      end - start === 16
+      test_squares[start].ascii === botPawnAscii &&
+      start >= botHomeRankMin &&
+      start <= botHomeRankMax &&
+      end - start === botDoubleStep
     )
       passant_pos_after = end;
 
     // board evaluation using mini_max algorithm by looking at future turns
+    // (the opponent moves next, so the recursion starts on their ply)
     let board_eval = minimax(
       depth - 1,
-      false,
+      !isBlackBot,
       -1000,
       1000,
       test_squares_2,
@@ -333,14 +344,15 @@ export function chooseBotMove({
       passant_pos_after,
       castlingRights
     );
-    if (board_eval >= best_value) {
+    const better = isBlackBot ? board_eval >= best_value : board_eval <= best_value;
+    if (better) {
       best_value = board_eval;
       rand_start = start;
       rand_end = end;
     }
   }
 
-  // rand_end === 100 indicates that black is in checkmate/stalemate
+  // rand_end === 100 indicates that the bot is in checkmate/stalemate
   if (rand_end === 100) return null;
   return { start: rand_start, end: rand_end };
 }

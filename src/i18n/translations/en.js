@@ -66,6 +66,12 @@ export const en = {
       nextMove: "Next move",
       lastMove: "Last move",
       flipBoard: "Flip board",
+      newGame: "New Game",
+      timeControl: "Time control",
+      playAs: "Play as",
+      start: "Start Game",
+      minuteUnit: "min",
+      hourUnit: "hr",
     },
   },
 };

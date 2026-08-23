@@ -66,6 +66,12 @@ export const ru = {
       nextMove: "Следующий ход",
       lastMove: "Последний ход",
       flipBoard: "Перевернуть доску",
+      newGame: "Новая игра",
+      timeControl: "Контроль времени",
+      playAs: "Играть за",
+      start: "Начать игру",
+      minuteUnit: "мин",
+      hourUnit: "ч",
     },
   },
 };
