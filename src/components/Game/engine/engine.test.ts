@@ -1,13 +1,15 @@
 import { King, Queen, Rook, Pawn, filler_piece, initializeBoard } from "./pieces";
+import type { Squares } from "./pieces";
 import {
   makeMove,
   canMoveThere,
   isCheckmate,
   isStalemate,
+  type CastlingRights,
 } from "./rules";
 import { chooseBotMove } from "./ai";
 
-const NO_CASTLE = {
+const NO_CASTLE: CastlingRights = {
   whiteKingHasMoved: 0,
   blackKingHasMoved: 0,
   leftWhiteRookHasMoved: 0,
@@ -16,7 +18,7 @@ const NO_CASTLE = {
   rightBlackRookHasMoved: 0,
 };
 
-function emptyBoard() {
+function emptyBoard(): Squares {
   return Array(64)
     .fill(null)
     .map(() => new filler_piece(null));
@@ -117,5 +119,6 @@ test("chooseBotMove picks a legal move in a simple position", () => {
     avoidMove: null,
   });
   expect(move).not.toBeNull();
+  if (move == null) throw new Error("expected a move");
   expect(canMoveThere(move.start, move.end, squares, 65, NO_CASTLE)).toBe(true);
 });

@@ -1,15 +1,26 @@
-import { Queen, filler_piece } from "./pieces";
+import { Queen, filler_piece, type Player, type Squares } from "./pieces";
 
-// `castlingRights` shape used throughout this module:
-// { whiteKingHasMoved, blackKingHasMoved, leftWhiteRookHasMoved,
-//   rightWhiteRookHasMoved, leftBlackRookHasMoved, rightBlackRookHasMoved }
-// Each caller builds this from whatever it considers "current" state, the
-// same way the original code read this.state.*_has_moved directly.
+// Every *_has_moved flag is 0 or 1, matching the Board state fields they're
+// built from (this.state.white_king_has_moved etc.) -- kept as number
+// rather than boolean to mirror that shape exactly.
+export interface CastlingRights {
+  whiteKingHasMoved: number;
+  blackKingHasMoved: number;
+  leftWhiteRookHasMoved: number;
+  rightWhiteRookHasMoved: number;
+  leftBlackRookHasMoved: number;
+  rightBlackRookHasMoved: number;
+}
 
 // apply a move to a squares array and return the resulting array. Pieces
 // are mutated in place (matching the rest of this engine's convention) so
 // callers that need an independent snapshot must clone first.
-export function makeMove(squares, start, end, passantPos) {
+export function makeMove(
+  squares: Squares,
+  start: number,
+  end: number,
+  passantPos: number
+): Squares {
   const copy_squares = squares.slice();
   // castling
   var isKing =
@@ -29,7 +40,7 @@ export function makeMove(squares, start, end, passantPos) {
   }
 
   // en passant
-  if (copy_squares[start].ascii.toLowerCase() === "p") {
+  if (copy_squares[start].ascii?.toLowerCase() === "p") {
     if (end - start === -7 || end - start === 9) {
       // white going up to the right
       if (start + 1 === passantPos)
@@ -61,7 +72,12 @@ export function makeMove(squares, start, end, passantPos) {
 }
 
 // returns true if castling is allowed
-export function castlingAllowed(start, end, squares, castlingRights) {
+export function castlingAllowed(
+  start: number,
+  end: number,
+  squares: Squares,
+  castlingRights: CastlingRights
+): boolean {
   const copy_squares = squares.slice();
   var player = copy_squares[start].player;
   var delta_pos = end - start;
@@ -97,7 +113,11 @@ export function castlingAllowed(start, end, squares, castlingRights) {
   return true;
 }
 // returns true if a piece is trying to skip over another piece
-export function blockersExist(start, end, squares) {
+export function blockersExist(
+  start: number,
+  end: number,
+  squares: Squares
+): boolean {
   var start_row = 8 - Math.floor(start / 8);
   var start_col = (start % 8) + 1;
   var end_row = 8 - Math.floor(end / 8);
@@ -135,7 +155,12 @@ export function blockersExist(start, end, squares) {
   return false;
 }
 // return true if pawn is not breaking any of its rules
-export function goodPawn(start, end, squares, passantPos) {
+export function goodPawn(
+  start: number,
+  end: number,
+  squares: Squares,
+  passantPos: number
+): boolean {
   var start_row = 8 - Math.floor(start / 8);
   var start_col = (start % 8) + 1;
   var end_row = 8 - Math.floor(end / 8);
@@ -185,27 +210,32 @@ export function goodPawn(start, end, squares, passantPos) {
   return true;
 }
 // return true if move from start to end is illegal
-export function invalidMove(start, end, squares, passantPos, castlingRights) {
+export function invalidMove(
+  start: number,
+  end: number,
+  squares: Squares,
+  passantPos: number,
+  castlingRights: CastlingRights
+): boolean {
   const copy_squares = squares.slice();
   // if the piece is a bishop, queen, rook, or pawn,
   // it cannot skip over pieces
   var bqrpk =
-    copy_squares[start].ascii.toLowerCase() === "r" ||
-    copy_squares[start].ascii.toLowerCase() === "q" ||
-    copy_squares[start].ascii.toLowerCase() === "b" ||
-    copy_squares[start].ascii.toLowerCase() === "p" ||
-    copy_squares[start].ascii.toLowerCase() === "k";
+    copy_squares[start].ascii?.toLowerCase() === "r" ||
+    copy_squares[start].ascii?.toLowerCase() === "q" ||
+    copy_squares[start].ascii?.toLowerCase() === "b" ||
+    copy_squares[start].ascii?.toLowerCase() === "p" ||
+    copy_squares[start].ascii?.toLowerCase() === "k";
   let invalid =
     bqrpk === true && blockersExist(start, end, copy_squares) === true;
   if (invalid) return invalid;
   // checking for certain rules regarding the pawn
-  var pawn = copy_squares[start].ascii.toLowerCase() === "p";
+  var pawn = copy_squares[start].ascii?.toLowerCase() === "p";
   invalid =
-    pawn === true &&
-    goodPawn(start, end, copy_squares, passantPos) === false;
+    pawn === true && goodPawn(start, end, copy_squares, passantPos) === false;
   if (invalid) return invalid;
   // checking for if castling is allowed
-  var king = copy_squares[start].ascii.toLowerCase() === "k";
+  var king = copy_squares[start].ascii?.toLowerCase() === "k";
   if (king && Math.abs(end - start) === 2)
     invalid =
       castlingAllowed(start, end, copy_squares, castlingRights) === false;
@@ -214,12 +244,12 @@ export function invalidMove(start, end, squares, passantPos, castlingRights) {
 }
 // returns true if there are any possible moves
 export function canMoveThere(
-  start,
-  end,
-  squares,
-  passantPos,
-  castlingRights
-) {
+  start: number,
+  end: number,
+  squares: Squares,
+  passantPos: number,
+  castlingRights: CastlingRights
+): boolean {
   const copy_squares = squares.slice();
   if (start === end)
     // cannot move to the position you're already sitting in
@@ -243,7 +273,7 @@ export function canMoveThere(
   var cant_castle =
     copy_squares[start].ascii === (player === "w" ? "k" : "K") &&
     Math.abs(end - start) === 2 &&
-    inCheck(player, copy_squares, passantPos, castlingRights);
+    inCheck(player as Player, copy_squares, passantPos, castlingRights);
   if (cant_castle) return false;
 
   // king cannot castle through check
@@ -255,7 +285,7 @@ export function canMoveThere(
     const test_squares = squares.slice();
     test_squares[start + (delta_pos === 2 ? 1 : -1)] = test_squares[start];
     test_squares[start] = new filler_piece(null);
-    if (inCheck(player, test_squares, passantPos, castlingRights))
+    if (inCheck(player as Player, test_squares, passantPos, castlingRights))
       return false;
   }
 
@@ -268,16 +298,24 @@ export function canMoveThere(
   } else if (check_squares[end].ascii === "P" && end >= 56 && end <= 63) {
     check_squares[end] = new Queen("b");
   }
-  if (inCheck(player, check_squares, passantPos, castlingRights) === true)
+  if (
+    inCheck(player as Player, check_squares, passantPos, castlingRights) ===
+    true
+  )
     return false;
 
   return true;
 }
 
 // returns true if player is in check
-export function inCheck(player, squares, passantPos, castlingRights) {
+export function inCheck(
+  player: Player,
+  squares: Squares,
+  passantPos: number,
+  castlingRights: CastlingRights
+): boolean {
   let king = player === "w" ? "k" : "K";
-  let position_of_king = null;
+  let position_of_king: number | null = null;
   const copy_squares = squares.slice();
   for (let i = 0; i < 64; i++) {
     if (copy_squares[i].ascii === king) {
@@ -291,9 +329,14 @@ export function inCheck(player, squares, passantPos, castlingRights) {
   for (let i = 0; i < 64; i++) {
     if (copy_squares[i].player !== player) {
       if (
-        copy_squares[i].can_move(i, position_of_king) === true &&
-        invalidMove(i, position_of_king, copy_squares, passantPos, castlingRights) ===
-          false
+        copy_squares[i].can_move(i, position_of_king as number) === true &&
+        invalidMove(
+          i,
+          position_of_king as number,
+          copy_squares,
+          passantPos,
+          castlingRights
+        ) === false
       )
         return true;
     }
@@ -301,7 +344,12 @@ export function inCheck(player, squares, passantPos, castlingRights) {
   return false;
 }
 // return true if player is in stalemate
-export function isStalemate(player, squares, passantPos, castlingRights) {
+export function isStalemate(
+  player: Player,
+  squares: Squares,
+  passantPos: number,
+  castlingRights: CastlingRights
+): boolean {
   if (inCheck(player, squares, passantPos, castlingRights)) return false;
 
   // if there is even only 1 way to move her piece,
@@ -317,7 +365,12 @@ export function isStalemate(player, squares, passantPos, castlingRights) {
   return true;
 }
 // return true if player is in checkmate
-export function isCheckmate(player, squares, passantPos, castlingRights) {
+export function isCheckmate(
+  player: Player,
+  squares: Squares,
+  passantPos: number,
+  castlingRights: CastlingRights
+): boolean {
   if (!inCheck(player, squares, passantPos, castlingRights)) return false;
   // if there is even only 1 way to move her piece,
   // the player is not in checkmate
