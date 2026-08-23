@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import "./header.styles.css";
 import LanguagesPopup from "./LanguagesPopup/LanguagesPopup";
+import { useOnClickOutside } from "../../helpers/hooks/useOnClickOutside";
+import logo from "../../images/logo.png";
 import armenian from "../../images/armenia.png";
 import russian from "../../images/russia.png";
 import english from "../../images/us.png";
@@ -11,15 +13,20 @@ import english from "../../images/us.png";
 function Header() {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const languageSwitchRef = useRef(null);
 
-  const handlePopup = () => {
-    setIsOpen(!isOpen);
-  };
+  const closePopup = () => setIsOpen(false);
+  useOnClickOutside(languageSwitchRef, closePopup);
 
   return (
     <div className="navbar navbar-inverse navbar-static-top">
       <div className="container">
         <div className="header-wrapper">
+          <div className="header-item">
+            <Link to="/" className="navbar-brand brand-logo-link">
+              <img src={logo} className="brand-logo" alt="World of Chess" />
+            </Link>
+          </div>
           <div className="header-item">
             <Link to="/" className="navbar-brand">
               {t("header.home")}
@@ -35,9 +42,15 @@ function Header() {
               {t("header.play")}
             </Link>
           </div>
-          <div>
-            <div className="language-switch-button" onClick={handlePopup}>
-              {isOpen && <LanguagesPopup />}
+          <div className="language-switch-wrapper" ref={languageSwitchRef}>
+            <button
+              type="button"
+              className="language-switch-button"
+              onClick={() => setIsOpen((open) => !open)}
+              aria-haspopup="true"
+              aria-expanded={isOpen}
+              aria-label={t("header.changeLanguage")}
+            >
               {i18n.language === "am" && (
                 <img
                   className="language-logo"
@@ -59,7 +72,8 @@ function Header() {
                   alt="english language"
                 />
               )}
-            </div>
+            </button>
+            {isOpen && <LanguagesPopup onSelect={closePopup} />}
           </div>
         </div>
       </div>

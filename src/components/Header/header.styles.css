@@ -2,6 +2,10 @@ body {
   background: #ededed;
 }
 
+.navbar {
+  margin-bottom: 0;
+}
+
 .header-wrapper {
   display: flex;
   flex-direction: row;
@@ -26,9 +30,22 @@ body {
   line-height: 20px;
 }
 
+.brand-logo-link {
+  padding: 0px !important;
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+}
+
 .language-logo {
   width: 28px;
   height: 28px;
+}
+
+.language-switch-wrapper {
+  display: flex;
 }
 
 .language-switch-button {
@@ -36,6 +53,7 @@ body {
   border: none;
   background-color: transparent;
   align-items: center;
+  padding: 0px;
   cursor: pointer;
 }
 

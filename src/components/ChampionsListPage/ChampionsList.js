@@ -18,7 +18,7 @@ function ChampionsList() {
                 <div>{t(champion.name)}</div>
                 <div>{champion.date}</div>
               </div>
-              <img src={champion.img} alt="" className="img" />
+              <img src={champion.img} alt={t(champion.name)} className="img" />
             </div>
           ))}
         </div>
