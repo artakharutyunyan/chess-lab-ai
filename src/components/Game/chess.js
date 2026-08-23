@@ -18,7 +18,6 @@ import blackRock from "../../images/black_rook.png";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
 import checkFlash from "./sfx/Check_Flash.mp3";
-import check from "./sfx/Check.mp3";
 import move from "./sfx/Move.mp3";
 import stalemate from "./sfx/Stalemate.mp3";
 import whiteDefeat from "./sfx/White_Defeat.mp3";
@@ -93,7 +92,7 @@ class Board extends React.Component {
       this.state.turn === "b" &&
       !this.state.mated
     )
-      return "cannot reset";
+      return;
     this.setState({
       squares: initializeBoard(),
       source: -1,
@@ -715,7 +714,7 @@ class Board extends React.Component {
   }
   // Chess bot for black player
   execute_bot(depth, passed_in_squares) {
-    if (this.state.mated) return "bot cannot run";
+    if (this.state.mated) return;
     const copy_squares = passed_in_squares.slice();
     let rand_start = 100;
     let rand_end = 100;
@@ -822,10 +821,10 @@ class Board extends React.Component {
     let copy_squares = this.state.squares.slice();
 
     if (this.state.history_num - 1 !== this.state.turn_num) {
-      return "currently viewing history";
+      return;
     }
 
-    if (this.state.mated) return "game-over";
+    if (this.state.mated) return;
 
     // first click
     if (this.state.source === -1 && this.state.bot_running === 0) {
@@ -903,7 +902,7 @@ class Board extends React.Component {
             source: -1,
             squares: copy_squares,
           });
-          return "invalid move";
+          return;
         }
 
         this.execute_move("w", copy_squares, this.state.source, i);
@@ -1016,27 +1015,27 @@ class Board extends React.Component {
       <div>
         {this.state.move_made && !this.state.capture_made && (
           <div>
-            <audio ref="audio_tag" src={move} controls autoPlay hidden />{" "}
+            <audio src={move} controls autoPlay hidden />{" "}
           </div>
         )}
         {this.state.capture_made && not_history && (
           <div>
-            <audio ref="audio_tag" src={capture} controls autoPlay hidden />{" "}
+            <audio src={capture} controls autoPlay hidden />{" "}
           </div>
         )}
         {black_mated && not_history && (
           <div>
-            <audio ref="audio_tag" src={blackDefeat} controls autoPlay hidden />{" "}
+            <audio src={blackDefeat} controls autoPlay hidden />{" "}
           </div>
         )}
         {white_mated && not_history && (
           <div>
-            <audio ref="audio_tag" src={whiteDefeat} controls autoPlay hidden />{" "}
+            <audio src={whiteDefeat} controls autoPlay hidden />{" "}
           </div>
         )}
         {stale && not_history && (
           <div>
-            <audio ref="audio_tag" src={stalemate} controls autoPlay hidden />{" "}
+            <audio src={stalemate} controls autoPlay hidden />{" "}
           </div>
         )}
         {this.state.check_flash &&
@@ -1044,13 +1043,7 @@ class Board extends React.Component {
           !this.state.just_clicked && (
             <div>
               {" "}
-              <audio
-                ref="audio_tag"
-                src={checkFlash}
-                controls
-                autoPlay
-                hidden
-              />{" "}
+              <audio src={checkFlash} controls autoPlay hidden />{" "}
             </div>
           )}
 
@@ -1166,7 +1159,7 @@ class Board extends React.Component {
       this.state.turn === "b" &&
       !this.state.mated
     ) {
-      return "not allowed to view history";
+      return;
     }
 
     let copy_squares = null;
@@ -1202,7 +1195,7 @@ class Board extends React.Component {
       copy_black_collection =
         this.state.history_black_collection[this.state.history_num];
     } else {
-      return "no more history";
+      return;
     }
 
     copy_squares = clear_possible_highlight(copy_squares).slice();

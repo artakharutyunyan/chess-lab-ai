@@ -4,7 +4,6 @@ import Cookies from "js-cookie";
 import "./languagesPopup.styles.css";
 import { languages } from "./constants";
 import { i18n } from "../../../i18n/index.js";
-import { useOnClickOutside } from "../../../helpers/hooks/useOnClickOutside";
 
 const LanguagesPopup = () => {
   const switchLanguage = (lang) => {
