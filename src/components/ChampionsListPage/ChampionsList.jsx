@@ -13,11 +13,18 @@ function ChampionsList() {
       <div className="champions-grid">
         {champions.map((champion) => (
           <div key={champion.id} className="champion-card">
-            <img
-              src={champion.img}
-              alt={t(champion.name)}
-              className="champion-photo"
-            />
+            <a
+              href={champion.wiki}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(champion.name)}
+            >
+              <img
+                src={champion.img}
+                alt={t(champion.name)}
+                className="champion-photo"
+              />
+            </a>
             <div className="champion-name">{t(champion.name)}</div>
             <div className="champion-date">{champion.date}</div>
           </div>

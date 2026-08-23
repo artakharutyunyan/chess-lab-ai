@@ -56,8 +56,18 @@
 
 .header-link:focus-visible {
   color: var(--color-header-text);
-  outline: 2px solid var(--color-header-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-header-accent);
+}
+
+.header-link--active {
+  color: var(--color-header-text);
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.header-link--active:hover {
+  background-color: rgba(255, 255, 255, 0.14);
 }
 
 .header-controls {
@@ -94,8 +104,8 @@
 
 .theme-toggle-button:focus-visible {
   color: var(--color-header-text);
-  outline: 2px solid var(--color-header-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-header-accent);
 }
 
 .language-logo {
@@ -128,8 +138,8 @@
 }
 
 .language-switch-button:focus-visible {
-  outline: 2px solid var(--color-header-accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-header-accent);
 }
 
 @media (max-width: 640px) {

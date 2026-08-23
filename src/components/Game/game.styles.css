@@ -79,6 +79,15 @@
   animation: bounceInDown 1.3s;
 }
 
+.board-page {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 32px 24px 48px;
+}
+
 .right_screen {
   position: relative;
   display: inline-block;
@@ -87,11 +96,12 @@
 }
 
 .left_screen {
-  position: relative;
-  float: left;
-  height: 100%;
-  width: 50%;
-  overflow: auto;
+  position: static;
+  float: none;
+  flex: 0 0 340px;
+  width: 340px;
+  height: auto;
+  overflow: visible;
 }
 
 .header_font {
@@ -155,16 +165,15 @@
 }
 
 .side_box {
-  width: 65%;
+  width: 100%;
   box-sizing: border-box;
   background-color: var(--color-surface);
   color: var(--color-text);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  position: relative;
-  top: calc(50% - 41vmin);
-  left: 13%;
-  margin: 0 0 30 0;
+  box-shadow: var(--shadow-product);
+  position: static;
+  margin: 0;
   padding-bottom: 1px;
 }
 
@@ -408,6 +417,11 @@
 }
 
 @media screen and (max-width: 1100px) {
+  .board-page {
+    padding: 24px 16px 40px;
+    gap: 20px;
+  }
+
   .right_screen {
     width: 100%;
     height: 100vmin;
@@ -415,8 +429,9 @@
   }
 
   .left_screen {
-    width: 100% !important;
-    height: auto;
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 420px;
   }
 
   .row_label {
@@ -432,12 +447,5 @@
   .table {
     top: calc(50% - 42vmin);
     left: calc(50% - 42vmin);
-  }
-
-  .side_box {
-    width: 60%;
-    top: calc(50% - 41vmin);
-    left: 17%;
-    margin: 40 0 20 0;
   }
 }

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import "./header.styles.css";
@@ -41,6 +41,10 @@ function ThemeIcon({ theme }) {
   );
 }
 
+function navLinkClass({ isActive }) {
+  return "header-link" + (isActive ? " header-link--active" : "");
+}
+
 function Header() {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -58,18 +62,18 @@ function Header() {
         </Link>
 
         <nav className="header-nav">
-          <Link to="/" className="header-link">
+          <NavLink to="/" end className={navLinkClass}>
             {t("header.home")}
-          </Link>
-          <Link to="/champions" className="header-link">
+          </NavLink>
+          <NavLink to="/champions" className={navLinkClass}>
             {t("header.worldChampions")}
-          </Link>
-          <Link to="/game" className="header-link">
+          </NavLink>
+          <NavLink to="/game" className={navLinkClass}>
             {t("header.play")}
-          </Link>
-          <Link to="/board" className="header-link">
+          </NavLink>
+          <NavLink to="/board" className={navLinkClass}>
             {t("header.board")}
-          </Link>
+          </NavLink>
         </nav>
 
         <div className="header-controls">

@@ -63,10 +63,20 @@ const PIECE_NAMES: Record<PieceType, string> = {
   pawn: "pawn",
 };
 
-// Original geometric silhouettes, one shape per piece type, shared by both
-// the "minimal" and "bold" sets (they differ only in fill/stroke weight,
-// the same way an icon library's filled/outlined variants share geometry).
-// viewBox is a fixed 0 0 100 100 for all of them.
+// Every piece shares the same trunk (base + neck + head), so all six types
+// stay proportionally consistent -- only a bold, simple emblem above the
+// head differs per type. Shared by both the "minimal" and "bold" sets (they
+// differ only in fill/stroke weight). viewBox is a fixed 0 0 100 100.
+function Trunk({ withHead = true }: { withHead?: boolean }) {
+  return (
+    <>
+      <polygon points="30,90 70,90 62,62 38,62" />
+      <rect x="43" y="50" width="14" height="12" />
+      {withHead && <circle cx="50" cy="38" r="13" />}
+    </>
+  );
+}
+
 function PieceShape({
   type,
   fill,
@@ -84,56 +94,49 @@ function PieceShape({
     case "pawn":
       return (
         <g {...shapeProps}>
-          <circle cx="50" cy="38" r="13" />
-          <rect x="44" y="50" width="12" height="8" rx="2" />
-          <polygon points="35,88 65,88 58,58 42,58" />
-        </g>
-      );
-    case "rook":
-      return (
-        <g {...shapeProps}>
-          <rect x="32" y="12" width="8" height="13" />
-          <rect x="46" y="12" width="8" height="13" />
-          <rect x="60" y="12" width="8" height="13" />
-          <rect x="32" y="25" width="36" height="33" />
-          <polygon points="28,88 72,88 66,58 34,58" />
+          <Trunk />
         </g>
       );
     case "bishop":
       return (
         <g {...shapeProps}>
-          <circle cx="50" cy="15" r="7" />
-          <ellipse cx="50" cy="42" rx="15" ry="20" />
-          <polygon points="32,88 68,88 60,62 40,62" />
-        </g>
-      );
-    case "knight":
-      return (
-        <g {...shapeProps}>
-          <polygon points="26,88 74,88 70,62 74,50 62,36 66,20 55,14 46,24 34,20 36,38 24,52 30,60" />
+          <Trunk />
+          <polygon points="50,8 44,20 56,20" />
         </g>
       );
     case "queen":
       return (
         <g {...shapeProps}>
-          <circle cx="30" cy="15" r="6.5" />
-          <circle cx="40" cy="15" r="6.5" />
-          <circle cx="50" cy="15" r="6.5" />
-          <circle cx="60" cy="15" r="6.5" />
-          <circle cx="70" cy="15" r="6.5" />
-          <rect x="27" y="20" width="46" height="8" />
-          <polygon points="37,58 63,58 57,28 43,28" />
-          <polygon points="28,88 72,88 64,58 36,58" />
+          <Trunk />
+          <circle cx="30" cy="16" r="5.5" />
+          <circle cx="42.5" cy="10" r="5.5" />
+          <circle cx="57.5" cy="10" r="5.5" />
+          <circle cx="70" cy="16" r="5.5" />
         </g>
       );
     case "king":
       return (
         <g {...shapeProps}>
-          <rect x="45" y="4" width="10" height="20" />
-          <rect x="38" y="10" width="24" height="8" />
-          <rect x="38" y="26" width="24" height="6" />
-          <polygon points="37,58 63,58 57,30 43,30" />
-          <polygon points="28,88 72,88 64,58 36,58" />
+          <Trunk />
+          <rect x="47" y="6" width="6" height="18" />
+          <rect x="41" y="12" width="18" height="6" />
+        </g>
+      );
+    case "rook":
+      return (
+        <g {...shapeProps}>
+          <Trunk withHead={false} />
+          <rect x="38" y="24" width="24" height="26" />
+          <rect x="36" y="12" width="7" height="9" />
+          <rect x="46.5" y="12" width="7" height="9" />
+          <rect x="57" y="12" width="7" height="9" />
+        </g>
+      );
+    case "knight":
+      return (
+        <g {...shapeProps}>
+          <Trunk withHead={false} />
+          <polygon points="38,50 38,30 46,16 54,22 68,28 64,38 54,34 52,50" />
         </g>
       );
   }

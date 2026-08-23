@@ -638,7 +638,7 @@ export class Board extends React.Component {
             </div>
           )}
 
-        <div className="bounceInDown">
+        <div className="board-page bounceInDown">
           <div className="left_screen bounceInDown">
             <div className="side_box">
               <div className="wrapper">

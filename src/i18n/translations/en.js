@@ -50,6 +50,8 @@ export const en = {
       kramnik: "Vladimir Kramnik",
       anand: "Viswanathan Anand",
       carlsen: "Magnus Carlsen",
+      dingLiren: "Ding Liren",
+      gukesh: "Gukesh Dommaraju",
     },
     game: {
       white: "White",

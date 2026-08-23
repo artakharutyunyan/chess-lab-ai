@@ -50,6 +50,8 @@ export const am = {
       kramnik: "Վլադիմիր Կրամնիկ",
       anand: "Վիշվանաթան Անանդ",
       carlsen: "Մագնուս Կարլսեն",
+      dingLiren: "Դին Լիրեն",
+      gukesh: "Գուկեշ Դոմմարաջու",
     },
     game: {
       white: "Սպիտակ",

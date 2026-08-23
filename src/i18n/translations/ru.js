@@ -50,6 +50,8 @@ export const ru = {
       kramnik: "Владимир Крамник",
       anand: "Вишванатан Ананд",
       carlsen: "Магнус Карлсен",
+      dingLiren: "Дин Лижэнь",
+      gukesh: "Гукеш Доммараджу",
     },
     game: {
       white: "Белые",

@@ -49,6 +49,22 @@
   background-color: var(--color-surface-alt);
   margin-bottom: 14px;
   box-shadow: var(--shadow-product);
+  display: block;
+  transition: opacity 0.15s ease;
+}
+
+.champion-card a {
+  display: block;
+  outline: none;
+  border-radius: var(--radius-sm);
+}
+
+.champion-card a:hover .champion-photo {
+  opacity: 0.85;
+}
+
+.champion-card a:focus-visible .champion-photo {
+  box-shadow: var(--shadow-product), 0 0 0 2px var(--color-accent);
 }
 
 .champion-name {
