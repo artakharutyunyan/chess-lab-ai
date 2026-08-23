@@ -1,7 +1,5 @@
 import React from "react";
 
-import { i18n } from "../../i18n/index";
-
 import "./game.styles.css";
 import whiteKing from "../../images/white_king.png";
 import whiteBishop from "../../images/white_bishop.png";
@@ -45,7 +43,7 @@ function Square(props) {
   }
 }
 
-class Board extends React.Component {
+export class Board extends React.Component {
   // initialize the board
   constructor() {
     super();
@@ -246,7 +244,11 @@ class Board extends React.Component {
     const copy_history_h4 = this.state.history_h4.slice();
     const copy_white_collection = this.state.history_white_collection.slice();
     const copy_black_collection = this.state.history_black_collection.slice();
-    copy_history.push(copy_squares);
+    // clone before storing: copy_squares also becomes the live `squares`
+    // state below and keeps getting mutated turn after turn, so the
+    // history entry needs pieces of its own or later moves would
+    // retroactively corrupt this snapshot.
+    copy_history.push(cloneSquares(copy_squares));
     copy_history_h1.push(start);
     copy_history_h2.push(end);
     copy_white_collection.push(
@@ -957,6 +959,9 @@ class Board extends React.Component {
         case 8:
           letter = "H";
           break;
+        default:
+          letter = "";
+          break;
       }
       col_nums.push(<Label key={letter} value={letter} />);
     }
@@ -1052,11 +1057,11 @@ class Board extends React.Component {
             <div className="side_box">
               <div className="wrapper">
                 <div className="player_box">
-                  <span className="medium_font"> {i18n.t("game.white")}</span>
+                  <span className="medium_font"> {this.props.t("game.white")}</span>
                   {this.state.pieces_collected_by_white}
                 </div>
                 <div className="player_box black_player_color">
-                  <span className="medium_font">{i18n.t("game.black")}</span>
+                  <span className="medium_font">{this.props.t("game.black")}</span>
                   {this.state.pieces_collected_by_black}
                 </div>
               </div>
@@ -1087,7 +1092,7 @@ class Board extends React.Component {
                   <span className="button_font">&lt;</span>
                 </button>
                 <button className="reset_button" onClick={() => this.reset()}>
-                  <span className="button_font">{i18n.t("game.restart")}</span>
+                  <span className="button_font">{this.props.t("game.restart")}</span>
                 </button>
                 <button
                   className="reset_button history"
@@ -1107,35 +1112,35 @@ class Board extends React.Component {
                 <p className="small_font">
                   {this.in_check("w", this.state.squares) &&
                   !this.checkmate("w", this.state.squares) === true
-                    ? i18n.t("game.check")
+                    ? this.props.t("game.check")
                     : ""}
                 </p>
                 <p className="small_font">
                   {this.in_check("b", this.state.squares) &&
                   !this.checkmate("b", this.state.squares) === true
-                    ? i18n.t("game.check")
+                    ? this.props.t("game.check")
                     : ""}
                 </p>
                 <p className="small_font">
                   {this.checkmate("w", this.state.squares) === true
-                    ? i18n.t("game.lost")
+                    ? this.props.t("game.lost")
                     : ""}
                 </p>
                 <p className="small_font">
                   {this.checkmate("b", this.state.squares) === true
-                    ? i18n.t("game.won")
+                    ? this.props.t("game.won")
                     : ""}
                 </p>
                 <p className="small_font">
                   {(this.stalemate("w", this.state.squares) &&
                     this.state.turn === "w") === true
-                    ? i18n.t("game.stalemate")
+                    ? this.props.t("game.stalemate")
                     : ""}
                 </p>
                 <p className="small_font">
                   {(this.stalemate("b", this.state.squares) &&
                     this.state.turn === "b") === true
-                    ? i18n.t("game.stalemate")
+                    ? this.props.t("game.stalemate")
                     : ""}
                 </p>
               </div>
@@ -1167,20 +1172,22 @@ class Board extends React.Component {
     let copy_black_collection = null;
 
     if (direction === "back_atw") {
-      copy_squares = this.state.history[0].slice();
+      copy_squares = cloneSquares(this.state.history[0]);
       copy_white_collection = [];
       copy_black_collection = [];
     } else if (
       direction === "next_atw" &&
       this.state.history_num < this.state.turn_num + 1
     ) {
-      copy_squares = this.state.history[this.state.turn_num].slice();
+      copy_squares = cloneSquares(this.state.history[this.state.turn_num]);
       copy_white_collection =
         this.state.history_white_collection[this.state.turn_num];
       copy_black_collection =
         this.state.history_black_collection[this.state.turn_num];
     } else if (direction === "back" && this.state.history_num - 2 >= 0) {
-      copy_squares = this.state.history[this.state.history_num - 2].slice();
+      copy_squares = cloneSquares(
+        this.state.history[this.state.history_num - 2]
+      );
       copy_white_collection =
         this.state.history_white_collection[this.state.history_num - 2];
       copy_black_collection =
@@ -1189,7 +1196,7 @@ class Board extends React.Component {
       direction === "next" &&
       this.state.history_num <= this.state.turn_num
     ) {
-      copy_squares = this.state.history[this.state.history_num].slice();
+      copy_squares = cloneSquares(this.state.history[this.state.history_num]);
       copy_white_collection =
         this.state.history_white_collection[this.state.history_num];
       copy_black_collection =
@@ -1262,12 +1269,6 @@ class Board extends React.Component {
         turn: direction === "back_atw" ? "w" : this.state.true_turn,
       });
     }
-  }
-}
-
-export class Game extends React.Component {
-  render() {
-    return <Board />;
   }
 }
 
@@ -1706,18 +1707,18 @@ function get_piece_value(piece, position) {
 // return the color of a square for the chess board
 function calc_squareColor(i, j, squares) {
   let square_color =
-    (isEven(i) && isEven(j)) || (!isEven(i) && !isEven(j))
+    (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
       ? "white_square"
       : "black_square";
   if (squares[i * 8 + j].highlight === 1) {
     square_color =
-      (isEven(i) && isEven(j)) || (!isEven(i) && !isEven(j))
+      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
         ? "selected_white_square"
         : "selected_black_square";
   }
   if (squares[i * 8 + j].possible === 1) {
     square_color =
-      (isEven(i) && isEven(j)) || (!isEven(i) && !isEven(j))
+      (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
         ? "highlighted_white_square"
         : "highlighted_black_square";
   }
@@ -1727,7 +1728,7 @@ function calc_squareColor(i, j, squares) {
   ) {
     if (squares[i * 8 + j].in_check === 1) {
       square_color =
-        (isEven(i) && isEven(j)) || (!isEven(i) && !isEven(j))
+        (isOdd(i) && isOdd(j)) || (!isOdd(i) && !isOdd(j))
           ? "in_check_square_white"
           : "in_check_square_black";
     }
@@ -1761,6 +1762,18 @@ function highlight_mate(player, squares, check_mated, stale_mated) {
   }
   return copy_squares;
 }
+// deep-ish clone of a squares array: pieces are mutated in place elsewhere
+// (highlight/possible/in_check/checked flags), so a plain .slice() only
+// copies the array, not the piece objects inside it. Any squares array
+// that needs to stay independent of future mutations (e.g. a snapshot
+// stored in history) must clone each piece too. Object.create preserves
+// the piece's prototype (King/Queen/.../filler_piece) so can_move() and
+// friends keep working on the clone.
+function cloneSquares(squares) {
+  return squares.map((piece) =>
+    Object.assign(Object.create(Object.getPrototypeOf(piece)), piece)
+  );
+}
 // clear highlights for squares that are selected
 function clear_highlight(squares) {
   const copy_squares = squares.slice();
@@ -1790,9 +1803,9 @@ function clear_check_highlight(squares, player) {
 }
 
 // Miscellaneous Functions ===============================
-// return if value is even
-function isEven(value) {
-  return value % 2;
+// return if value is odd
+function isOdd(value) {
+  return value % 2 !== 0;
 }
 
 // =======================================================

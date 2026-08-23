@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { i18n } from "../../i18n/index";
+import { useTranslation } from "react-i18next";
 
 import "./header.styles.css";
 import LanguagesPopup from "./LanguagesPopup/LanguagesPopup";
@@ -9,6 +9,7 @@ import russian from "../../images/russia.png";
 import english from "../../images/us.png";
 
 function Header() {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handlePopup = () => {
@@ -21,17 +22,17 @@ function Header() {
         <div className="header-wrapper">
           <div className="header-item">
             <Link to="/" className="navbar-brand">
-              {i18n.t("header.home")}
+              {t("header.home")}
             </Link>
           </div>
           <div className="header-item">
             <Link to="/champions" className="navbar-brand">
-              {i18n.t("header.worldChampions")}
+              {t("header.worldChampions")}
             </Link>
           </div>
           <div className="header-item">
             <Link to="/game" className="navbar-brand">
-              {i18n.t("header.play")}
+              {t("header.play")}
             </Link>
           </div>
           <div>
