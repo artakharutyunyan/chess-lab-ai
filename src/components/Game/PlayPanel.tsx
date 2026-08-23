@@ -1,0 +1,332 @@
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { PieceType } from "./pieceSets";
+import CapturedPieceIcon from "./CapturedPieceIcon";
+import type { MoveRow } from "./notation";
+import "./playPanel.styles.css";
+
+const CAPTURE_ORDER: PieceType[] = ["pawn", "knight", "bishop", "rook", "queen"];
+const PIECE_VALUE: Record<PieceType, number> = {
+  pawn: 1,
+  knight: 3,
+  bishop: 3,
+  rook: 5,
+  queen: 9,
+  king: 0,
+};
+
+function formatClock(ms: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function sortForTray(pieces: PieceType[]): PieceType[] {
+  return [...pieces].sort((a, b) => CAPTURE_ORDER.indexOf(a) - CAPTURE_ORDER.indexOf(b));
+}
+
+function materialValue(pieces: PieceType[]): number {
+  return pieces.reduce((sum, p) => sum + PIECE_VALUE[p], 0);
+}
+
+// Ticks whichever side's clock is active, one second at a time. Isolated
+// here (rather than in Board's state) so a tick only re-renders the panel,
+// not the whole board.
+function useChessClocks(activePlayer: "w" | "b" | null, resetToken: number, initialMs: number) {
+  const [whiteMs, setWhiteMs] = useState(initialMs);
+  const [blackMs, setBlackMs] = useState(initialMs);
+
+  useEffect(() => {
+    setWhiteMs(initialMs);
+    setBlackMs(initialMs);
+    // Only the token identifies a fresh game -- initialMs doesn't change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetToken]);
+
+  useEffect(() => {
+    if (activePlayer == null) return undefined;
+    const id = window.setInterval(() => {
+      if (activePlayer === "w") setWhiteMs((ms) => Math.max(0, ms - 1000));
+      else setBlackMs((ms) => Math.max(0, ms - 1000));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [activePlayer]);
+
+  return { whiteMs, blackMs };
+}
+
+function ClockChip({ ms, running }: { ms: number; running: boolean }) {
+  const label = formatClock(ms);
+  const critical = ms <= 30000;
+  return (
+    <div
+      className={`play-clock${running ? " play-clock--running" : ""}`}
+      aria-live="off"
+    >
+      {label}
+      {critical && (
+        <span className="visually-hidden" aria-live="polite">
+          {Math.ceil(ms / 1000)} seconds left
+        </span>
+      )}
+    </div>
+  );
+}
+
+function KingGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <rect x="11" y="2" width="2" height="6" fill="currentColor" />
+      <rect x="8.5" y="4.5" width="7" height="2" fill="currentColor" />
+      <path d="M6 20 L7 11 L17 11 L18 20 Z" fill="currentColor" />
+      <circle cx="12" cy="11" r="3.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+function PlayerRow({
+  label,
+  captured,
+  materialLead,
+  clockMs,
+  clockRunning,
+}: {
+  label: string;
+  captured: PieceType[];
+  materialLead: number;
+  clockMs: number;
+  clockRunning: boolean;
+}) {
+  return (
+    <div className="play-player-row">
+      <div className="play-avatar">
+        <KingGlyph />
+      </div>
+      <div className="play-player-info">
+        <div className="play-player-name">{label}</div>
+        <div className="play-captured-row">
+          {sortForTray(captured).map((type, i) => (
+            <CapturedPieceIcon key={i} type={type} />
+          ))}
+          {materialLead > 0 && <span className="play-material-lead">+{materialLead}</span>}
+        </div>
+      </div>
+      <ClockChip ms={clockMs} running={clockRunning} />
+    </div>
+  );
+}
+
+function IconFirst() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <rect x="4" y="4" width="1.8" height="12" fill="currentColor" />
+      <path d="M15 4 L7 10 L15 16 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function IconPrev() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path d="M13 4 L6 10 L13 16 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function IconNext() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path d="M7 4 L14 10 L7 16 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function IconLast() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <rect x="14.2" y="4" width="1.8" height="12" fill="currentColor" />
+      <path d="M5 4 L13 10 L5 16 Z" fill="currentColor" />
+    </svg>
+  );
+}
+function IconFlip() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path
+        d="M5 7 H13 M13 7 L10.5 4.5 M13 7 L10.5 9.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 13 H7 M7 13 L9.5 10.5 M7 13 L9.5 15.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+function IconRestart() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path
+        d="M15.5 10a5.5 5.5 0 1 1-1.8-4.1"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path d="M14.5 3.5 L14.5 6.5 L11.5 6.5 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export interface PlayPanelProps {
+  capturedByWhite: PieceType[];
+  capturedByBlack: PieceType[];
+  moveRows: MoveRow[];
+  currentMoveIndex: number;
+  openingName: string | null;
+  activePlayer: "w" | "b" | null;
+  clockResetToken: number;
+  initialClockMs: number;
+  resultText: string | null;
+  whiteLabel: string;
+  blackLabel: string;
+  onFirst: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onLast: () => void;
+  onFlip: () => void;
+  onRestart: () => void;
+}
+
+export default function PlayPanel({
+  capturedByWhite,
+  capturedByBlack,
+  moveRows,
+  currentMoveIndex,
+  openingName,
+  activePlayer,
+  clockResetToken,
+  initialClockMs,
+  resultText,
+  whiteLabel,
+  blackLabel,
+  onFirst,
+  onPrev,
+  onNext,
+  onLast,
+  onFlip,
+  onRestart,
+}: PlayPanelProps) {
+  const { t } = useTranslation();
+  const { whiteMs, blackMs } = useChessClocks(activePlayer, clockResetToken, initialClockMs);
+  const currentMoveRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    currentMoveRef.current?.scrollIntoView({ block: "nearest" });
+  }, [currentMoveIndex]);
+
+  const material = materialValue(capturedByWhite) - materialValue(capturedByBlack);
+
+  const currentRow = currentMoveIndex > 0 ? Math.floor((currentMoveIndex - 1) / 2) : -1;
+  const currentColor = currentMoveIndex % 2 === 1 ? "white" : "black";
+
+  return (
+    <div className="play-panel">
+      <PlayerRow
+        label={blackLabel}
+        captured={capturedByBlack}
+        materialLead={material < 0 ? -material : 0}
+        clockMs={blackMs}
+        clockRunning={activePlayer === "b"}
+      />
+
+      <div className="play-movelist">
+        <div className="play-movelist-header">
+          {resultText ? (
+            <span className="play-result-banner">{resultText}</span>
+          ) : (
+            <>
+              <span className="play-movelist-label">{t("game.moves")}</span>
+              {openingName && <span className="play-opening-name">{openingName}</span>}
+            </>
+          )}
+        </div>
+        <div className="play-movelist-body" role="list">
+          {moveRows.map((row, i) => (
+            <div className="play-move-row" role="listitem" key={row.number}>
+              <span className="play-move-number">{row.number}.</span>
+              <span
+                ref={i === currentRow && currentColor === "white" ? currentMoveRef : undefined}
+                className={
+                  "play-move-cell" +
+                  (i === currentRow && currentColor === "white" ? " play-move-cell--current" : "")
+                }
+                aria-current={i === currentRow && currentColor === "white" ? "step" : undefined}
+              >
+                {row.white}
+              </span>
+              <span
+                ref={i === currentRow && currentColor === "black" ? currentMoveRef : undefined}
+                className={
+                  "play-move-cell" +
+                  (i === currentRow && currentColor === "black" ? " play-move-cell--current" : "")
+                }
+                aria-current={i === currentRow && currentColor === "black" ? "step" : undefined}
+              >
+                {row.black}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <PlayerRow
+        label={whiteLabel}
+        captured={capturedByWhite}
+        materialLead={material > 0 ? material : 0}
+        clockMs={whiteMs}
+        clockRunning={activePlayer === "w"}
+      />
+
+      <div className="play-controls">
+        <div className="play-controls-segment">
+          <button type="button" className="play-control-button" onClick={onFirst} aria-label={t("game.firstMove")}>
+            <IconFirst />
+          </button>
+          <button type="button" className="play-control-button" onClick={onPrev} aria-label={t("game.previousMove")}>
+            <IconPrev />
+          </button>
+          <button type="button" className="play-control-button" onClick={onNext} aria-label={t("game.nextMove")}>
+            <IconNext />
+          </button>
+          <button type="button" className="play-control-button" onClick={onLast} aria-label={t("game.lastMove")}>
+            <IconLast />
+          </button>
+        </div>
+        <div className="play-controls-spacer" />
+        <button
+          type="button"
+          className="play-control-button play-control-button--solo"
+          onClick={onFlip}
+          aria-label={t("game.flipBoard")}
+        >
+          <IconFlip />
+        </button>
+        <button
+          type="button"
+          className="play-control-button play-control-button--solo"
+          onClick={onRestart}
+          aria-label={t("game.restart")}
+        >
+          <IconRestart />
+        </button>
+      </div>
+    </div>
+  );
+}

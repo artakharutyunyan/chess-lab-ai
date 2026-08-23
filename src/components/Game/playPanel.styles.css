@@ -1,0 +1,238 @@
+/* Side panel per docs/PLAY-PAGE-SPEC.md -- dark in both themes on purpose,
+   it's what anchors the composition against the light board. */
+
+.play-panel {
+  width: 380px;
+  height: 704px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px -28px rgba(35, 38, 31, 0.45), 0 2px 6px rgba(35, 38, 31, 0.06);
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+
+[data-theme="dark"] .play-panel {
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Player row --------------------------------------------------------- */
+
+.play-player-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.play-avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background-color: var(--panel-bg-2);
+  color: var(--panel-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.play-player-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.play-captured-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 15px;
+  margin-top: 4px;
+}
+
+.play-material-lead {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--panel-muted);
+  margin-left: 2px;
+}
+
+.play-clock {
+  font-family: var(--font-mono);
+  font-size: 21px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background-color: var(--panel-bg-2);
+  color: var(--panel-muted);
+  flex-shrink: 0;
+}
+
+.play-clock--running {
+  background-color: var(--accent);
+  color: #1d2018;
+}
+
+/* Move list ------------------------------------------------------------ */
+
+.play-movelist {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--panel-line);
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.play-movelist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  flex-shrink: 0;
+}
+
+.play-movelist-label,
+.play-opening-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--panel-muted);
+}
+
+.play-result-banner {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--panel-text);
+}
+
+.play-movelist-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.play-move-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.play-move-row:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.028);
+}
+
+.play-move-number {
+  width: 30px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--panel-muted);
+}
+
+.play-move-cell {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--panel-text);
+}
+
+.play-move-cell--current {
+  background-color: var(--accent);
+  color: #1d2018;
+  font-weight: 600;
+}
+
+/* Controls --------------------------------------------------------------- */
+
+.play-controls {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.play-controls-segment {
+  display: flex;
+  background-color: var(--panel-bg-2);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.play-controls-spacer {
+  flex: 1;
+}
+
+.play-control-button {
+  width: 46px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background-color: transparent;
+  color: var(--panel-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.play-controls-segment .play-control-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.play-control-button--solo {
+  border-radius: 12px;
+  background-color: var(--panel-bg-2);
+}
+
+.play-control-button--solo:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.play-control-button:active {
+  transform: scale(0.95);
+}
+
+.play-control-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}

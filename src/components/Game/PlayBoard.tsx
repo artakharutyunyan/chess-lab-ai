@@ -20,6 +20,7 @@ interface PlayBoardProps {
   // Whose pieces are currently clickable -- null when no moves are
   // allowed right now (bot thinking, game over, browsing history).
   movablePlayer: "w" | "b" | null;
+  flipped: boolean;
   onSquareClick: (index: number) => void;
 }
 
@@ -38,18 +39,21 @@ export default function PlayBoard({
   lastMoveSquares,
   checkSquare,
   movablePlayer,
+  flipped,
   onSquareClick,
 }: PlayBoardProps) {
   const { pieceSetId } = useBoardSettings();
 
   return (
     <div className="play-board" role="grid" aria-label="Chess board">
-      {ROWS.map((i) => {
-        const rank = 8 - i;
+      {ROWS.map((visualRow) => {
         return (
-          <div className="play-board-row" role="row" key={i}>
-            {ROWS.map((j) => {
+          <div className="play-board-row" role="row" key={visualRow}>
+            {ROWS.map((visualCol) => {
+              const i = flipped ? 7 - visualRow : visualRow;
+              const j = flipped ? 7 - visualCol : visualCol;
               const index = i * 8 + j;
+              const rank = 8 - i;
               const file = FILES[j];
               const dark = (i + j) % 2 === 1;
               const piece = squares[index];
@@ -82,12 +86,12 @@ export default function PlayBoard({
                   {checkSquare === index && (
                     <span className="play-square-check" aria-hidden="true" />
                   )}
-                  {j === 0 && (
+                  {visualCol === 0 && (
                     <span className={`play-coord play-coord--rank ${coordTone}`} aria-hidden="true">
                       {rank}
                     </span>
                   )}
-                  {i === 7 && (
+                  {visualRow === 7 && (
                     <span className={`play-coord play-coord--file ${coordTone}`} aria-hidden="true">
                       {file}
                     </span>

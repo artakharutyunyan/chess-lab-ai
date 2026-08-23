@@ -10,9 +10,10 @@ import {
   isCheckmate,
 } from "./engine/rules";
 import { chooseBotMove } from "./engine/ai";
-import { getPieceIcon } from "./pieceSets";
+import { TYPE_BY_LETTER } from "./pieceSets";
 import PlayBoard from "./PlayBoard";
-import { useBoardSettings } from "../../context/BoardSettingsContext";
+import PlayPanel from "./PlayPanel";
+import { buildMoveRows, lookupOpeningName } from "./notation";
 import blackDefeat from "./sfx/Black_Defeat.mp3";
 import capture from "./sfx/Capture.mp3";
 import checkFlash from "./sfx/Check_Flash.mp3";
@@ -57,7 +58,13 @@ export class Board extends React.Component {
       check_flash: false,
       viewing_history: false,
       just_clicked: false,
+      board_flipped: false,
+      game_id: 0,
     };
+  }
+
+  flipBoard() {
+    this.setState({ board_flipped: !this.state.board_flipped });
   }
 
   // bundle the castling-rights slice of state into the shape rules.js
@@ -102,8 +109,8 @@ export class Board extends React.Component {
       pieces_collected_by_black: [],
       history: [initializeBoard()],
       history_num: 1,
-      history_h1: [0],
-      history_h2: [0],
+      history_h1: [null],
+      history_h2: [null],
       history_h3: [null],
       history_h4: [null],
       history_white_collection: [null],
@@ -114,6 +121,7 @@ export class Board extends React.Component {
       check_flash: false,
       viewing_history: false,
       just_clicked: false,
+      game_id: this.state.game_id + 1,
     });
   }
 
@@ -183,7 +191,7 @@ export class Board extends React.Component {
         ? this.state.pieces_collected_by_white.slice()
         : this.state.pieces_collected_by_black.slice();
     if (copy_squares[end].ascii != null) {
-      collection.push(<Collected value={copy_squares[end]} />);
+      collection.push(copy_squares[end].ascii);
       this.setState({
         capture_made: true,
       });
@@ -192,11 +200,11 @@ export class Board extends React.Component {
       if (end - start === (player === "w" ? -9 : 7)) {
         // black going down to the left OR white going up to the left
         if (start - 1 === this.state.passant_pos)
-          collection.push(<Collected value={copy_squares[start - 1]} />);
+          collection.push(copy_squares[start - 1].ascii);
       } else if (end - start === (player === "w" ? -7 : 9)) {
         // black going down to the right OR white going up to the right
         if (start + 1 === this.state.passant_pos)
-          collection.push(<Collected value={copy_squares[start + 1]} />);
+          collection.push(copy_squares[start + 1].ascii);
       }
     }
 
@@ -540,6 +548,32 @@ export class Board extends React.Component {
       (isStalemate("b", this.state.squares, passantPos, castlingRights) &&
         this.state.turn === "b");
 
+    const capturedByWhite = this.state.pieces_collected_by_white
+      .map((ascii) => TYPE_BY_LETTER[ascii.toLowerCase()])
+      .filter(Boolean);
+    const capturedByBlack = this.state.pieces_collected_by_black
+      .map((ascii) => TYPE_BY_LETTER[ascii.toLowerCase()])
+      .filter(Boolean);
+
+    const moveRows = buildMoveRows(
+      this.state.history,
+      this.state.history_h1,
+      this.state.history_h2,
+      passantPos,
+      castlingRights
+    );
+    const openingName = lookupOpeningName(moveRows);
+    const currentMoveIndex = this.state.history_num - 1;
+
+    const activePlayer = this.state.mated || !not_history ? null : this.state.turn;
+
+    let resultText = null;
+    if (not_history) {
+      if (white_mated) resultText = this.props.t("game.blackWins");
+      else if (black_mated) resultText = this.props.t("game.whiteWins");
+      else if (stale) resultText = this.props.t("game.stalemateResult");
+    }
+
     return (
       <div>
         {this.state.move_made && !this.state.capture_made && (
@@ -577,106 +611,6 @@ export class Board extends React.Component {
           )}
 
         <div className="board-page bounceInDown">
-          <div className="left_screen bounceInDown">
-            <div className="side_box">
-              <div className="wrapper">
-                <div className="player_box">
-                  <span className="medium_font"> {this.props.t("game.white")}</span>
-                  {this.state.pieces_collected_by_white}
-                </div>
-                <div className="player_box black_player_color">
-                  <span className="medium_font">{this.props.t("game.black")}</span>
-                  {this.state.pieces_collected_by_black}
-                </div>
-              </div>
-              <div className="wrapper">
-                {this.state.turn === "w" ? (
-                  <div className="highlight_box"></div>
-                ) : (
-                  <div className="highlight_box transparent"></div>
-                )}
-                {this.state.turn === "b" ? (
-                  <div className="highlight_box"></div>
-                ) : (
-                  <div className="highlight_box transparent"></div>
-                )}
-              </div>
-
-              <div className="button_wrapper">
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("back_atw")}
-                >
-                  <span className="button_font">&lt;&lt;</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("back")}
-                >
-                  <span className="button_font">&lt;</span>
-                </button>
-                <button className="reset_button" onClick={() => this.reset()}>
-                  <span className="button_font">{this.props.t("game.restart")}</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("next")}
-                >
-                  <span className="button_font">&gt;</span>
-                </button>
-                <button
-                  className="reset_button history"
-                  onClick={() => this.viewHistory("next_atw")}
-                >
-                  <span className="button_font">&gt;&gt;</span>
-                </button>
-              </div>
-
-              <div className="mate_wrapper">
-                <p className="small_font">
-                  {inCheck("w", this.state.squares, passantPos, castlingRights) &&
-                  !white_mated === true
-                    ? this.props.t("game.check")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {inCheck("b", this.state.squares, passantPos, castlingRights) &&
-                  !black_mated === true
-                    ? this.props.t("game.check")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {white_mated === true ? this.props.t("game.lost") : ""}
-                </p>
-                <p className="small_font">
-                  {black_mated === true ? this.props.t("game.won") : ""}
-                </p>
-                <p className="small_font">
-                  {(isStalemate(
-                    "w",
-                    this.state.squares,
-                    passantPos,
-                    castlingRights
-                  ) &&
-                    this.state.turn === "w") === true
-                    ? this.props.t("game.stalemate")
-                    : ""}
-                </p>
-                <p className="small_font">
-                  {(isStalemate(
-                    "b",
-                    this.state.squares,
-                    passantPos,
-                    castlingRights
-                  ) &&
-                    this.state.turn === "b") === true
-                    ? this.props.t("game.stalemate")
-                    : ""}
-                </p>
-              </div>
-            </div>
-          </div>
-
           <div className="bounceInDown">
             <PlayBoard
               squares={this.state.squares}
@@ -685,7 +619,30 @@ export class Board extends React.Component {
               lastMoveSquares={lastMoveSquares}
               checkSquare={checkSquare}
               movablePlayer={movablePlayer}
+              flipped={this.state.board_flipped}
               onSquareClick={(i) => this.handleClick(i)}
+            />
+          </div>
+
+          <div className="bounceInDown">
+            <PlayPanel
+              capturedByWhite={capturedByWhite}
+              capturedByBlack={capturedByBlack}
+              moveRows={moveRows}
+              currentMoveIndex={currentMoveIndex}
+              openingName={openingName}
+              activePlayer={activePlayer}
+              clockResetToken={this.state.game_id}
+              initialClockMs={10 * 60 * 1000}
+              resultText={resultText}
+              whiteLabel={this.props.t("game.white")}
+              blackLabel={this.props.t("game.black")}
+              onFirst={() => this.viewHistory("back_atw")}
+              onPrev={() => this.viewHistory("back")}
+              onNext={() => this.viewHistory("next")}
+              onLast={() => this.viewHistory("next_atw")}
+              onFlip={() => this.flipBoard()}
+              onRestart={() => this.reset()}
             />
           </div>
         </div>
@@ -809,18 +766,6 @@ export class Board extends React.Component {
       });
     }
   }
-}
-
-// Helper Functions for Render ===========================
-// helper function to help generate arrays of pieces captured by a player
-function Collected(props) {
-  const { pieceSetId } = useBoardSettings();
-  return (
-    <button className={"collected"}>
-      {" "}
-      {getPieceIcon(props.value.ascii, pieceSetId)}{" "}
-    </button>
-  );
 }
 
 // Helper Functions to Handle Square Highlighting ========
