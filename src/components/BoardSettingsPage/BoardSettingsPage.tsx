@@ -67,6 +67,33 @@ export default function BoardSettingsPage() {
             </button>
           ))}
         </div>
+        <p className="piece-set-credit">
+          Minimal piece art:{" "}
+          <a href="https://github.com/neverRare" target="_blank" rel="noopener noreferrer">
+            neverRare
+          </a>{" "}
+          (
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            CC BY 4.0
+          </a>
+          ). Bold piece art:{" "}
+          <a href="https://github.com/LexLuengas" target="_blank" rel="noopener noreferrer">
+            Alexis Luengas
+          </a>{" "}
+          (
+          <a
+            href="https://github.com/LexLuengas/chessnut-pieces/blob/master/LICENSE.txt"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Apache 2.0
+          </a>
+          ).
+        </p>
       </section>
     </div>
   );

@@ -13,6 +13,39 @@ import blackPawn from "../../images/black_pawn.png";
 import blackQueen from "../../images/black_queen.png";
 import blackRock from "../../images/black_rook.png";
 
+// "Minimal" is the kiwen-suwi set (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/)
+// by neverRare (https://github.com/neverRare), sourced from
+// https://github.com/lichess-org/lila/tree/master/public/piece/kiwen-suwi.
+import minimalWK from "../../images/pieces/minimal/wK.svg";
+import minimalWQ from "../../images/pieces/minimal/wQ.svg";
+import minimalWR from "../../images/pieces/minimal/wR.svg";
+import minimalWB from "../../images/pieces/minimal/wB.svg";
+import minimalWN from "../../images/pieces/minimal/wN.svg";
+import minimalWP from "../../images/pieces/minimal/wP.svg";
+import minimalBK from "../../images/pieces/minimal/bK.svg";
+import minimalBQ from "../../images/pieces/minimal/bQ.svg";
+import minimalBR from "../../images/pieces/minimal/bR.svg";
+import minimalBB from "../../images/pieces/minimal/bB.svg";
+import minimalBN from "../../images/pieces/minimal/bN.svg";
+import minimalBP from "../../images/pieces/minimal/bP.svg";
+
+// "Bold" is the chessnut set (Apache License 2.0,
+// https://github.com/LexLuengas/chessnut-pieces/blob/master/LICENSE.txt)
+// by Alexis Luengas (https://github.com/LexLuengas), sourced from
+// https://github.com/lichess-org/lila/tree/master/public/piece/chessnut.
+import boldWK from "../../images/pieces/bold/wK.svg";
+import boldWQ from "../../images/pieces/bold/wQ.svg";
+import boldWR from "../../images/pieces/bold/wR.svg";
+import boldWB from "../../images/pieces/bold/wB.svg";
+import boldWN from "../../images/pieces/bold/wN.svg";
+import boldWP from "../../images/pieces/bold/wP.svg";
+import boldBK from "../../images/pieces/bold/bK.svg";
+import boldBQ from "../../images/pieces/bold/bQ.svg";
+import boldBR from "../../images/pieces/bold/bR.svg";
+import boldBB from "../../images/pieces/bold/bB.svg";
+import boldBN from "../../images/pieces/bold/bN.svg";
+import boldBP from "../../images/pieces/bold/bP.svg";
+
 export type PieceType = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 export type PieceSetId = "classic" | "minimal" | "bold";
 
@@ -29,21 +62,6 @@ export const PIECE_SETS: PieceSetOption[] = [
 ];
 
 export const DEFAULT_PIECE_SET_ID: PieceSetId = "classic";
-
-const CLASSIC_ICONS: Record<string, string> = {
-  k: whiteKing,
-  q: whiteQueen,
-  r: whiteRock,
-  b: whiteBishop,
-  n: whiteKnight,
-  p: whitePawn,
-  K: blackKing,
-  Q: blackQueen,
-  R: blackRock,
-  B: blackBishop,
-  N: blackKnight,
-  P: blackPawn,
-};
 
 const TYPE_BY_LETTER: Record<string, PieceType> = {
   k: "king",
@@ -63,118 +81,51 @@ const PIECE_NAMES: Record<PieceType, string> = {
   pawn: "pawn",
 };
 
-// Every piece shares the same trunk (base + neck + head), so all six types
-// stay proportionally consistent -- only a bold, simple emblem above the
-// head differs per type. Shared by both the "minimal" and "bold" sets (they
-// differ only in fill/stroke weight). viewBox is a fixed 0 0 100 100.
-function Trunk({ withHead = true }: { withHead?: boolean }) {
-  return (
-    <>
-      <polygon points="30,90 70,90 62,62 38,62" />
-      <rect x="43" y="50" width="14" height="12" />
-      {withHead && <circle cx="50" cy="38" r="13" />}
-    </>
-  );
-}
-
-function PieceShape({
-  type,
-  fill,
-  stroke,
-  strokeWidth,
-}: {
-  type: PieceType;
-  fill: string;
-  stroke: string;
-  strokeWidth: number;
-}) {
-  const shapeProps = { fill, stroke, strokeWidth, strokeLinejoin: "round" as const };
-
-  switch (type) {
-    case "pawn":
-      return (
-        <g {...shapeProps}>
-          <Trunk />
-        </g>
-      );
-    case "bishop":
-      return (
-        <g {...shapeProps}>
-          <Trunk />
-          <polygon points="50,8 44,20 56,20" />
-        </g>
-      );
-    case "queen":
-      return (
-        <g {...shapeProps}>
-          <Trunk />
-          <circle cx="30" cy="16" r="5.5" />
-          <circle cx="42.5" cy="10" r="5.5" />
-          <circle cx="57.5" cy="10" r="5.5" />
-          <circle cx="70" cy="16" r="5.5" />
-        </g>
-      );
-    case "king":
-      return (
-        <g {...shapeProps}>
-          <Trunk />
-          <rect x="47" y="6" width="6" height="18" />
-          <rect x="41" y="12" width="18" height="6" />
-        </g>
-      );
-    case "rook":
-      return (
-        <g {...shapeProps}>
-          <Trunk withHead={false} />
-          <rect x="38" y="24" width="24" height="26" />
-          <rect x="36" y="12" width="7" height="9" />
-          <rect x="46.5" y="12" width="7" height="9" />
-          <rect x="57" y="12" width="7" height="9" />
-        </g>
-      );
-    case "knight":
-      return (
-        <g {...shapeProps}>
-          <Trunk withHead={false} />
-          <polygon points="38,50 38,30 46,16 54,22 68,28 64,38 54,34 52,50" />
-        </g>
-      );
-  }
-}
-
-function svgIcon(type: PieceType, isWhite: boolean, variant: "minimal" | "bold") {
-  const fill =
-    variant === "minimal"
-      ? isWhite
-        ? "#f5f4f1"
-        : "#1d1d1f"
-      : isWhite
-      ? "#fbead9"
-      : "#2a1a12";
-  // Stroke must contrast with this piece's own fill, not just the board --
-  // a dark stroke on a dark fill (or vice versa) disappears regardless of
-  // what's behind it. White pieces get a dark stroke, black pieces a light
-  // one, in each variant's palette.
-  const stroke = isWhite
-    ? variant === "minimal"
-      ? "#1d1d1f"
-      : "#8b5e3c"
-    : variant === "minimal"
-    ? "#c9c7bd"
-    : "#c98a5e";
-  const strokeWidth = variant === "minimal" ? 2 : 4.5;
-
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className="piece"
-      role="img"
-      aria-label={`${isWhite ? "white" : "black"} ${PIECE_NAMES[type]}`}
-    >
-      <PieceShape type={type} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-    </svg>
-  );
-}
+// Keyed by the engine's ascii convention: lowercase = white, uppercase = black.
+const ICONS_BY_SET: Record<PieceSetId, Record<string, string>> = {
+  classic: {
+    k: whiteKing,
+    q: whiteQueen,
+    r: whiteRock,
+    b: whiteBishop,
+    n: whiteKnight,
+    p: whitePawn,
+    K: blackKing,
+    Q: blackQueen,
+    R: blackRock,
+    B: blackBishop,
+    N: blackKnight,
+    P: blackPawn,
+  },
+  minimal: {
+    k: minimalWK,
+    q: minimalWQ,
+    r: minimalWR,
+    b: minimalWB,
+    n: minimalWN,
+    p: minimalWP,
+    K: minimalBK,
+    Q: minimalBQ,
+    R: minimalBR,
+    B: minimalBB,
+    N: minimalBN,
+    P: minimalBP,
+  },
+  bold: {
+    k: boldWK,
+    q: boldWQ,
+    r: boldWR,
+    b: boldWB,
+    n: boldWN,
+    p: boldWP,
+    K: boldBK,
+    Q: boldBQ,
+    R: boldBR,
+    B: boldBB,
+    N: boldBN,
+    P: boldBP,
+  },
+};
 
 // Returns the icon element for a piece, given its engine `ascii` code
 // (lowercase = white, uppercase = black, matching pieces.tsx's convention)
@@ -189,16 +140,12 @@ export function getPieceIcon(
   if (type == null) return null;
   const isWhite = ascii === letter;
 
-  if (pieceSetId === "classic") {
-    const src = CLASSIC_ICONS[ascii];
-    return (
-      <img
-        src={src}
-        className="piece"
-        alt={`${isWhite ? "white" : "black"} ${PIECE_NAMES[type]}`}
-      />
-    );
-  }
-
-  return svgIcon(type, isWhite, pieceSetId);
+  const src = ICONS_BY_SET[pieceSetId][ascii];
+  return (
+    <img
+      src={src}
+      className="piece"
+      alt={`${isWhite ? "white" : "black"} ${PIECE_NAMES[type]}`}
+    />
+  );
 }

@@ -45,6 +45,14 @@ function navLinkClass({ isActive }) {
   return "header-link" + (isActive ? " header-link--active" : "");
 }
 
+// Some browsers still mark a link/button as :focus-visible after a plain
+// mouse click (their "was this keyboard-like" heuristic isn't perfectly
+// reliable) -- suppressing focus-from-mousedown keeps the ring for real
+// keyboard navigation without it flashing on every click.
+function suppressMouseFocusRing(event) {
+  event.preventDefault();
+}
+
 function Header() {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -62,16 +70,33 @@ function Header() {
         </Link>
 
         <nav className="header-nav">
-          <NavLink to="/" end className={navLinkClass}>
+          <NavLink
+            to="/"
+            end
+            className={navLinkClass}
+            onMouseDown={suppressMouseFocusRing}
+          >
             {t("header.home")}
           </NavLink>
-          <NavLink to="/champions" className={navLinkClass}>
+          <NavLink
+            to="/champions"
+            className={navLinkClass}
+            onMouseDown={suppressMouseFocusRing}
+          >
             {t("header.worldChampions")}
           </NavLink>
-          <NavLink to="/game" className={navLinkClass}>
+          <NavLink
+            to="/game"
+            className={navLinkClass}
+            onMouseDown={suppressMouseFocusRing}
+          >
             {t("header.play")}
           </NavLink>
-          <NavLink to="/board" className={navLinkClass}>
+          <NavLink
+            to="/board"
+            className={navLinkClass}
+            onMouseDown={suppressMouseFocusRing}
+          >
             {t("header.board")}
           </NavLink>
         </nav>
@@ -81,6 +106,7 @@ function Header() {
             type="button"
             className="theme-toggle-button"
             onClick={toggleTheme}
+            onMouseDown={suppressMouseFocusRing}
             aria-label={t("header.toggleTheme")}
           >
             <ThemeIcon theme={theme} />
@@ -91,6 +117,7 @@ function Header() {
               type="button"
               className="language-switch-button"
               onClick={() => setIsOpen((open) => !open)}
+              onMouseDown={suppressMouseFocusRing}
               aria-haspopup="true"
               aria-expanded={isOpen}
               aria-label={t("header.changeLanguage")}
