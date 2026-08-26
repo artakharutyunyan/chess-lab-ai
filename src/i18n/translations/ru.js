@@ -119,6 +119,7 @@ export const ru = {
       blackWinsResignation: "Чёрные побеждают: белые сдались",
       whiteWinsOnTime: "Белые побеждают по времени",
       blackWinsOnTime: "Чёрные побеждают по времени",
+      secondsLeft: "Осталось {{count}} секунд",
       stalemateResult: "Ничья по пату",
       moves: "Ходы",
       firstMove: "Первый ход",

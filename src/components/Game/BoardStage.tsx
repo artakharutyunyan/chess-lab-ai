@@ -57,15 +57,27 @@ function useChessClocks(
     setWhiteMs(initialMs);
     setBlackMs(initialMs);
     firedRef.current = false;
-    // Only the token identifies a fresh game -- initialMs doesn't change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetToken]);
+    // resetToken alone would miss a still-pending time-control change: it
+    // only bumps on restart, but PlaySetup lets a player pick a new time
+    // control (initialMs) before ever starting the first game, while
+    // resetToken is still at its very first value.
+  }, [resetToken, initialMs]);
 
   useEffect(() => {
     if (activePlayer == null) return undefined;
+    // Decrement by real elapsed wall-clock time (Date.now() deltas), not a
+    // fixed 1000ms per tick -- a backgrounded/throttled tab can fire this
+    // interval far less than once a second (browsers clamp background-tab
+    // timers, and can throttle chained ones to roughly once a minute), and
+    // counting ticks instead of elapsed time would let a player's clock
+    // run down slower than the real time actually spent on their move.
+    let last = Date.now();
     const id = window.setInterval(() => {
-      if (activePlayer === "w") setWhiteMs((ms) => Math.max(0, ms - 1000));
-      else setBlackMs((ms) => Math.max(0, ms - 1000));
+      const now = Date.now();
+      const elapsed = now - last;
+      last = now;
+      if (activePlayer === "w") setWhiteMs((ms) => Math.max(0, ms - elapsed));
+      else setBlackMs((ms) => Math.max(0, ms - elapsed));
     }, 1000);
     return () => window.clearInterval(id);
   }, [activePlayer]);
@@ -85,6 +97,7 @@ function useChessClocks(
 }
 
 function ClockChip({ ms, running }: { ms: number; running: boolean }) {
+  const { t } = useTranslation();
   const label = formatClock(ms);
   const seconds = Math.ceil(ms / 1000);
   // Only the running clock is actually counting down -- announcing the
@@ -99,7 +112,7 @@ function ClockChip({ ms, running }: { ms: number; running: boolean }) {
       {label}
       {announce && (
         <span className="visually-hidden" aria-live="polite">
-          {seconds} seconds left
+          {t("game.secondsLeft", { count: seconds })}
         </span>
       )}
     </div>

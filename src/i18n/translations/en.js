@@ -119,6 +119,7 @@ export const en = {
       blackWinsResignation: "Black wins by resignation",
       whiteWinsOnTime: "White wins on time",
       blackWinsOnTime: "Black wins on time",
+      secondsLeft: "{{count}} seconds left",
       stalemateResult: "Draw by stalemate",
       moves: "Moves",
       firstMove: "First move",

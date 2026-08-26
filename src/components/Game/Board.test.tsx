@@ -95,6 +95,27 @@ test("a player's clock reaching zero ends the game on time and freezes the board
   }
 });
 
+test("a time control picked before starting the game is what the clock actually counts down", () => {
+  vi.useFakeTimers();
+  try {
+    renderGame();
+    // Picking a time control happens on PlaySetup, before the game (and
+    // its clock-reset token) exists at all -- the clock still needs to
+    // pick up this choice, not silently keep counting down from whatever
+    // the default was when the page first mounted.
+    fireEvent.click(screen.getByRole("button", { name: "1 min" }));
+    fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+    act(() => {
+      vi.advanceTimersByTime(60 * 1000);
+    });
+
+    expect(screen.getByText(/black wins on time/i)).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 test("keyboard: f flips the board", async () => {
   const user = userEvent.setup();
   renderGame();

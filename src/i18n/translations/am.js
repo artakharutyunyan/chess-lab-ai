@@ -119,6 +119,7 @@ export const am = {
       blackWinsResignation: "Սևերը հաղթում են. սպիտակները հանձնվեցին",
       whiteWinsOnTime: "Սպիտակները հաղթում են ժամանակով",
       blackWinsOnTime: "Սևերը հաղթում են ժամանակով",
+      secondsLeft: "Մնաց {{count}} վայրկյան",
       stalemateResult: "Ոչ ոքի պատով",
       moves: "Քայլեր",
       firstMove: "Առաջին քայլ",
