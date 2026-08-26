@@ -1,5 +1,31 @@
 export const en = {
   translation: {
+    home: {
+      heroTitle: "ChessLab",
+      heroTagline:
+        "Play a real Stockfish opponent, browse the World Chess Champions, and make the board your own.",
+      playNow: "Play Now",
+      howToPlay: "How to Play",
+      featuresHeading: "What's inside",
+      features: {
+        play: {
+          title: "Play vs Stockfish",
+          body: "A genuine Stockfish engine, tunable from Easy to Grandmaster.",
+        },
+        board: {
+          title: "Customize your board",
+          body: "11 board colors and 8 piece styles, saved to your device.",
+        },
+        champions: {
+          title: "World Champions",
+          body: "Every undisputed World Chess Champion, from Steinitz to today.",
+        },
+        rules: {
+          title: "Learn the Rules",
+          body: "A full rules reference, from how pieces move to castling and draws.",
+        },
+      },
+    },
     header: {
       home: "Home",
       worldChampions: "World champions",

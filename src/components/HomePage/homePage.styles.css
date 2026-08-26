@@ -1,11 +1,172 @@
-.background {
-  width: 100%;
+.home-page {
+  background-color: var(--color-bg);
+}
+
+/* The photo backdrop spans both the hero and the feature grid below it, so
+   the two read as one continuous section rather than a hero image handing
+   off to a flat page background. Deliberately keeps a fixed dark-photo-
+   plus-scrim look regardless of the site's light/dark theme toggle -- same
+   reasoning as the header's "always black" per theme.css: a photographic
+   backdrop doesn't read well re-tinted, so its own colors (and the light
+   text sitting on it) live outside the --color-* light/dark split. */
+.home-photo-backdrop {
+  position: relative;
+  overflow: hidden;
+  /* Guarantees the image covers the full viewport below the header even
+     when the hero+features content is shorter than the screen -- without
+     this, taller screens showed .home-page's flat background color below
+     the content instead of more photo (56px matches the header's own
+     fixed height, same pattern as .board-page in Game/game.styles.css). */
   min-height: calc(100vh - 56px);
   background-image: url("../../images/chesswallpaperl.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.home-photo-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 11, 8, 0.55) 0%,
+    rgba(10, 11, 8, 0.72) 100%
+  );
+}
+
+.home-hero {
+  position: relative;
+  min-height: 420px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.home-hero-content {
+  position: relative;
+  max-width: 640px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.home-hero-title {
+  margin: 0 0 12px;
+  font-size: 48px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.home-hero-tagline {
+  margin: 0 auto;
+  max-width: 480px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.home-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.home-cta {
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.1s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.home-cta:active {
+  transform: scale(0.98);
+}
+
+.home-cta--primary {
+  background-color: var(--accent);
+  color: #1d2018;
+}
+
+.home-cta--primary:hover {
+  background-color: #e6b358;
+}
+
+.home-cta--secondary {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.home-cta--secondary:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.home-section {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 24px 56px;
+}
+
+.home-section-heading {
+  margin: 0 0 20px;
+  font-size: 22px;
+  text-align: center;
+  /* On the shared photo backdrop, not a plain page background -- same
+     light color as the hero title rather than the theme-dependent
+     --color-text. */
+  color: #ffffff;
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.home-feature-card {
+  display: block;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+
+.home-feature-card:hover {
+  border-color: var(--color-accent);
+}
+
+.home-feature-card:active {
+  transform: scale(0.98);
+}
+
+.home-feature-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.home-feature-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+@media screen and (max-width: 560px) {
+  .home-hero-title {
+    font-size: 34px;
+  }
+
+  .home-hero-tagline {
+    font-size: 15px;
+  }
 }

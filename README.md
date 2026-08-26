@@ -4,6 +4,8 @@ A chess app built with React: play against a real Stockfish engine, browse the
 history of World Chess Champions, and customize how the board and pieces look.
 Available in English, Russian, and Armenian, with light and dark themes.
 
+![Home page](docs/screenshots/home-page.jpg)
+
 ![Play page](docs/screenshots/play-page.jpg)
 
 ## Features
@@ -11,8 +13,11 @@ Available in English, Russian, and Armenian, with light and dark themes.
 - **Play against the computer** — click, drag-and-drop, or full keyboard control
   (arrow keys move a cursor, Enter/Space selects and moves, modified arrows step
   through history, `f` flips the board). Choose your side, a time control from
-  1 minute to 2 hours, and a difficulty level (Easy through Grandmaster) before
-  starting — changeable mid-game too.
+  1 minute to 2 hours, and a difficulty level (Easy through Grandmaster, each
+  labeled with its approximate Elo) before starting — changeable mid-game too.
+  Resign at any point via a confirm dialog; captured pieces are tracked in a
+  tray next to each player's clock, rendered in whichever piece style you've
+  picked so they always match the board.
 - **Stockfish-powered opponent** — the bot's moves come from
   [Stockfish](https://stockfishchess.org/) (GPLv3), run client-side via
   WebAssembly in a Web Worker (see `src/components/Game/engine/stockfish.ts`),
@@ -20,15 +25,19 @@ Available in English, Russian, and Armenian, with light and dark themes.
   can't start in a given browser, play falls back automatically to a small
   local minimax bot (`src/components/Game/engine/ai.ts`) so the game keeps
   working either way. Real-time clocks, full move history with algebraic
-  notation, captured-piece tracking, and board flipping are all part of the
-  Play page.
+  notation, and board flipping are all part of the Play page.
 - **World Champions** — a gallery of every undisputed World Chess Champion from
   Wilhelm Steinitz to the present, each linking out to their Wikipedia article.
-- **Board customization** — a dozen board color pairings, three piece styles
-  (a classic set, plus two original minimal/bold sets), move-hint/raised-piece/
-  last-move-highlight toggles, and board size, saved to your device and
-  available both from the dedicated Board page and a quick-access dialog
-  opened from the Play page itself.
+  The reigning champion also gets a teaser card on the Home page.
+- **Board customization** — 11 board color themes and 8 piece styles (a
+  classic set plus seven open-licensed sets: Minimal, Bold, Staunton, Merida,
+  3D, Rustic, and Celtic — see credits on the Board page), move-hint/
+  raised-piece/last-move-highlight toggles, and board size, all saved to your
+  device and available both from the dedicated Board page and a quick-access
+  dialog opened from the Play page itself.
+- **Rules page** — a full walkthrough of how to play: objective, setup, how
+  each piece moves, castling/en passant/promotion, check/checkmate/stalemate,
+  draws, and how to read algebraic notation. Available in all three languages.
 - **Light and dark themes**, remembered across visits.
 - **Internationalized** — English, Russian, and Armenian.
 
@@ -56,6 +65,8 @@ npm run preview     # preview the production build locally
   and newer components are fully typed; some older UI components remain `.jsx`
 - [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/react)
 - [react-i18next](https://react.i18next.com/) for translations
+- [Stockfish](https://stockfishchess.org/) (GPLv3) compiled to WebAssembly,
+  vendored under `public/stockfish/` (see `NOTICE.md` there for licensing)
 
 ## Project structure
 
@@ -63,11 +74,13 @@ npm run preview     # preview the production build locally
 src/
   components/
     Game/            # the Play page: board, panel, setup screen, and the AI engine
-      engine/        # pieces, move rules, and the minimax AI -- no UI code
-    BoardSettingsPage/
+      engine/        # pieces, move rules, Stockfish/FEN glue, and the minimax fallback -- no UI code
+    BoardSettingsPage/ # dedicated /board page; BoardSettingsFields.tsx is shared
+                        # with the in-game settings dialog (Game/BoardSettingsModal.tsx)
     ChampionsListPage/
-    Header/
+    RulesPage/
     HomePage/
+    Header/
   context/           # theme and board-settings React context providers
   i18n/translations/ # en / ru / am
 docs/                # design specs and reference screenshots

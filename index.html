@@ -18,7 +18,12 @@
       );
     })();
   </script>
-  <link rel="icon" href="/favicon.ico" />
+  <!-- Versioned query string: browsers cache favicons per-origin far more
+       aggressively than normal assets and often won't re-fetch one even
+       across reloads once cached for this origin+path -- bumping this
+       forces it to be treated as a new URL. Bump again (v3, v4, ...) if
+       the favicon image itself changes and still doesn't show up. -->
+  <link rel="icon" href="/favicon.ico?v=3" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1d2018" />
   <meta name="description" content="ChessLab -- play chess against a configurable engine, browse World Chess Champions, and customize your board." />
