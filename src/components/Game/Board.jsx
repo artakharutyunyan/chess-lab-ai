@@ -17,7 +17,7 @@ import {
 import { squaresToFen, uciMoveToIndices } from "./engine/fen";
 import { stockfish } from "./engine/stockfish";
 import { TYPE_BY_LETTER } from "./pieceSets";
-import PlayBoard from "./PlayBoard";
+import BoardStage from "./BoardStage";
 import PlayPanel from "./PlayPanel";
 import PlaySetup from "./PlaySetup";
 import { buildMoveRows, lookupOpeningName } from "./notation";
@@ -61,6 +61,7 @@ export class Board extends React.Component {
       history_black_collection: [null],
       mated: false,
       resigned_by: null,
+      time_expired_by: null,
       move_made: false,
       capture_made: false,
       check_flash: false,
@@ -162,6 +163,7 @@ export class Board extends React.Component {
       history_black_collection: [null],
       mated: false,
       resigned_by: null,
+      time_expired_by: null,
       move_made: false,
       capture_made: false,
       check_flash: false,
@@ -183,6 +185,18 @@ export class Board extends React.Component {
     this.setState({
       mated: true,
       resigned_by: this.state.human_player,
+    });
+  }
+
+  // A player's clock hit zero -- they lose on time, same as checkmate:
+  // freezes the board (handleClick and execute_bot both bail on
+  // this.state.mated) and shows a result banner. `color` is whichever
+  // side's flag fell, from BoardStage's per-second clock tick.
+  handleTimeout(color) {
+    if (!this.state.game_started || this.state.mated) return;
+    this.setState({
+      mated: true,
+      time_expired_by: color,
     });
   }
 
@@ -677,6 +691,8 @@ export class Board extends React.Component {
     if (not_history) {
       if (this.state.resigned_by === "w") resultText = this.props.t("game.blackWinsResignation");
       else if (this.state.resigned_by === "b") resultText = this.props.t("game.whiteWinsResignation");
+      else if (this.state.time_expired_by === "w") resultText = this.props.t("game.blackWinsOnTime");
+      else if (this.state.time_expired_by === "b") resultText = this.props.t("game.whiteWinsOnTime");
       else if (white_mated) resultText = this.props.t("game.blackWins");
       else if (black_mated) resultText = this.props.t("game.whiteWins");
       else if (stale) resultText = this.props.t("game.stalemateResult");
@@ -694,16 +710,18 @@ export class Board extends React.Component {
             <audio src={capture} controls autoPlay hidden />{" "}
           </div>
         )}
-        {(black_mated || this.state.resigned_by === "b") && not_history && (
-          <div>
-            <audio src={blackDefeat} controls autoPlay hidden />{" "}
-          </div>
-        )}
-        {(white_mated || this.state.resigned_by === "w") && not_history && (
-          <div>
-            <audio src={whiteDefeat} controls autoPlay hidden />{" "}
-          </div>
-        )}
+        {(black_mated || this.state.resigned_by === "b" || this.state.time_expired_by === "b") &&
+          not_history && (
+            <div>
+              <audio src={blackDefeat} controls autoPlay hidden />{" "}
+            </div>
+          )}
+        {(white_mated || this.state.resigned_by === "w" || this.state.time_expired_by === "w") &&
+          not_history && (
+            <div>
+              <audio src={whiteDefeat} controls autoPlay hidden />{" "}
+            </div>
+          )}
         {stale && not_history && (
           <div>
             <audio src={stalemate} controls autoPlay hidden />{" "}
@@ -720,7 +738,7 @@ export class Board extends React.Component {
 
         <div className="board-page bounceInDown">
           <div className="bounceInDown">
-            <PlayBoard
+            <BoardStage
               squares={this.state.squares}
               selected={selectedSquare}
               legalTargets={legalTargets}
@@ -732,24 +750,23 @@ export class Board extends React.Component {
               onFlip={() => this.flipBoard()}
               onStepBack={() => this.viewHistory("back")}
               onStepForward={() => this.viewHistory("next")}
+              humanPlayer={this.state.human_player}
+              activePlayer={activePlayer}
+              clockResetToken={this.state.game_id}
+              initialClockMs={this.state.time_control_ms}
+              capturedByWhite={capturedByWhite}
+              capturedByBlack={capturedByBlack}
+              onTimeExpire={(color) => this.handleTimeout(color)}
             />
           </div>
 
           <div className="bounceInDown">
             {this.state.game_started ? (
               <PlayPanel
-                capturedByWhite={capturedByWhite}
-                capturedByBlack={capturedByBlack}
                 moveRows={moveRows}
                 currentMoveIndex={currentMoveIndex}
                 openingName={openingName}
-                activePlayer={activePlayer}
-                clockResetToken={this.state.game_id}
-                initialClockMs={this.state.time_control_ms}
                 resultText={resultText}
-                whiteLabel={this.props.t("game.white")}
-                blackLabel={this.props.t("game.black")}
-                humanPlayer={this.state.human_player}
                 difficulty={this.state.difficulty}
                 onSelectDifficulty={(level) => this.setDifficulty(level)}
                 gameOver={this.state.mated}

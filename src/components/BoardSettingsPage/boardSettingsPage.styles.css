@@ -1,18 +1,23 @@
 .board-settings-page {
-  max-width: 900px;
+  /* Wider than the intro paragraph's own 640px cap -- on a laptop-width
+     screen or wider, that leaves room for the color/piece grids below to
+     pack more columns per row (they're plain auto-fill grids, so a wider
+     container alone means fewer rows and less scrolling to see every
+     option), without the paragraph itself reading as an over-wide line. */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 24px 64px;
+  padding: 32px 24px 48px;
 }
 
 .board-settings-title {
   text-align: center;
   color: var(--color-text);
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
 }
 
 .board-settings-intro {
   max-width: 640px;
-  margin: 0 auto 40px;
+  margin: 0 auto 28px;
   text-align: center;
   color: var(--color-text-muted);
   font-size: 17px;
@@ -20,20 +25,20 @@
 }
 
 .board-settings-section {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .board-settings-heading {
   font-size: 18px;
   color: var(--color-text);
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
 }
 
 .board-theme-grid,
 .piece-set-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
 }
 
 .board-theme-option,
@@ -41,11 +46,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background-color: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: 12px;
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s ease, transform 0.1s ease;

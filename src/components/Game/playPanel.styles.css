@@ -3,7 +3,12 @@
 
 .play-panel {
   width: 380px;
-  height: 704px;
+  /* Matches the board+bars stack's height exactly (BoardStage.tsx: a
+     player bar above and below the board, ~52px each with a 10px gap on
+     either side of the board -- see the --sq-size comment in
+     game.styles.css) so the two columns stay level whether --sq-size is
+     the desktop default or shrunk to fit a shorter screen. */
+  height: calc(var(--sq-size, 88px) * 8 + 2 * 52px + 2 * 10px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -19,10 +24,11 @@
   box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
 }
 
-/* Matches .play-board's mobile breakpoint in playBoard.styles.css -- once
-   the board shrinks to fit the viewport, the panel (used for both the
-   in-game panel and the pre-game PlaySetup screen) goes fluid-width and
-   grows to fit its content instead of the desktop's fixed square height. */
+/* Matches --sq-size's own mobile breakpoint in game.styles.css -- once
+   the board and panel stack (rather than sit side by side), the panel
+   (used for both the in-game panel and the pre-game PlaySetup screen)
+   goes fluid-width and grows to fit its content instead of matching the
+   board's height. */
 @media screen and (max-width: 1100px) {
   .play-panel {
     width: 100%;
@@ -34,119 +40,6 @@
     flex: none;
     max-height: 240px;
   }
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Player row --------------------------------------------------------- */
-
-.play-player-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-  flex-shrink: 0;
-}
-
-.play-avatar {
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  border-radius: 11px;
-  background-color: var(--panel-bg-2);
-  color: var(--panel-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.play-player-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.play-player-name {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-/* A small bordered "tray" (not just a bare row of icons) so captured
-   pieces read as their own board-like module. Height is fixed (not
-   content-driven) and wrapping overflow scrolls *inside* the tray via
-   overflow-y -- so no matter how many pieces pile up over a game, this
-   box's own height never changes. That matters beyond just tidiness: a
-   captured-row that grew taller as pieces piled up was the main source of
-   the panel reflowing turn to turn, which on mobile visibly shifted the
-   whole board+panel stack on every capture (see .board-page in
-   game.styles.css) -- a fixed-height tray removes that source for good. */
-.play-captured-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  overflow-y: auto;
-  align-items: center;
-  gap: 4px;
-  height: 30px;
-  margin-top: 6px;
-  padding: 3px 6px;
-  border-radius: 8px;
-  background-color: var(--panel-bg-2);
-  scrollbar-width: none;
-}
-
-.play-captured-row::-webkit-scrollbar {
-  display: none;
-}
-
-/* Captured-piece icons reuse the board's own piece art (getPieceIcon, same
-   as PlayBoard.tsx) rather than a separate generic silhouette set, so a
-   captured piece always looks like the piece that was actually on the
-   board -- whatever piece style is selected in Board settings. */
-.play-captured-piece {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.play-captured-piece .piece {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.play-material-lead {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--panel-muted);
-  margin-left: 2px;
-}
-
-.play-clock {
-  font-family: var(--font-mono);
-  font-size: 21px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 10px;
-  background-color: var(--panel-bg-2);
-  color: var(--panel-muted);
-  flex-shrink: 0;
-}
-
-.play-clock--running {
-  background-color: var(--accent);
-  color: #1d2018;
 }
 
 /* Move list ------------------------------------------------------------ */

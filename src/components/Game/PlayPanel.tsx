@@ -1,129 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getPieceIcon, LETTER_BY_TYPE, type PieceType, type PieceSetId } from "./pieceSets";
 import type { MoveRow } from "./notation";
 import { DIFFICULTY_LEVELS, STOCKFISH_DIFFICULTY_PRESETS, type Difficulty } from "./engine/ai";
 import BoardSettingsModal from "./BoardSettingsModal";
 import ConfirmDialog from "./ConfirmDialog";
-import { useBoardSettings } from "../../context/BoardSettingsContext";
 import "./playPanel.styles.css";
-
-const CAPTURE_ORDER: PieceType[] = ["pawn", "knight", "bishop", "rook", "queen"];
-const PIECE_VALUE: Record<PieceType, number> = {
-  pawn: 1,
-  knight: 3,
-  bishop: 3,
-  rook: 5,
-  queen: 9,
-  king: 0,
-};
-
-function formatClock(ms: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-function sortForTray(pieces: PieceType[]): PieceType[] {
-  return [...pieces].sort((a, b) => CAPTURE_ORDER.indexOf(a) - CAPTURE_ORDER.indexOf(b));
-}
-
-function materialValue(pieces: PieceType[]): number {
-  return pieces.reduce((sum, p) => sum + PIECE_VALUE[p], 0);
-}
-
-// The engine's ascii convention is lowercase = white, uppercase = black --
-// a captured-piece tray only ever holds one color (the *opponent's* pieces,
-// see capturedColor below), so this just picks the right case.
-function capturedAscii(type: PieceType, color: "w" | "b"): string {
-  const letter = LETTER_BY_TYPE[type];
-  return color === "w" ? letter : letter.toUpperCase();
-}
-
-// Ticks whichever side's clock is active, one second at a time. Isolated
-// here (rather than in Board's state) so a tick only re-renders the panel,
-// not the whole board.
-function useChessClocks(activePlayer: "w" | "b" | null, resetToken: number, initialMs: number) {
-  const [whiteMs, setWhiteMs] = useState(initialMs);
-  const [blackMs, setBlackMs] = useState(initialMs);
-
-  useEffect(() => {
-    setWhiteMs(initialMs);
-    setBlackMs(initialMs);
-    // Only the token identifies a fresh game -- initialMs doesn't change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetToken]);
-
-  useEffect(() => {
-    if (activePlayer == null) return undefined;
-    const id = window.setInterval(() => {
-      if (activePlayer === "w") setWhiteMs((ms) => Math.max(0, ms - 1000));
-      else setBlackMs((ms) => Math.max(0, ms - 1000));
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [activePlayer]);
-
-  return { whiteMs, blackMs };
-}
-
-function ClockChip({ ms, running }: { ms: number; running: boolean }) {
-  const label = formatClock(ms);
-  const seconds = Math.ceil(ms / 1000);
-  // Only the running clock is actually counting down -- announcing the
-  // idle side's static remaining time is just noise. Fixed thresholds
-  // (not "every second under 30") keep this from firing ~30 times.
-  const announce = running && (seconds === 30 || seconds === 10 || seconds === 5);
-  return (
-    <div
-      className={`play-clock${running ? " play-clock--running" : ""}`}
-      aria-live="off"
-    >
-      {label}
-      {announce && (
-        <span className="visually-hidden" aria-live="polite">
-          {seconds} seconds left
-        </span>
-      )}
-    </div>
-  );
-}
-
-function PlayerRow({
-  label,
-  captured,
-  capturedColor,
-  pieceSetId,
-  materialLead,
-  clockMs,
-  clockRunning,
-}: {
-  label: string;
-  captured: PieceType[];
-  capturedColor: "w" | "b";
-  pieceSetId: PieceSetId;
-  materialLead: number;
-  clockMs: number;
-  clockRunning: boolean;
-}) {
-  return (
-    <div className="play-player-row">
-      <div className="play-avatar" aria-hidden="true" />
-      <div className="play-player-info">
-        <div className="play-player-name">{label}</div>
-        <div className="play-captured-row">
-          {sortForTray(captured).map((type, i) => (
-            <span className="play-captured-piece" key={i}>
-              {getPieceIcon(capturedAscii(type, capturedColor), pieceSetId)}
-            </span>
-          ))}
-          {materialLead > 0 && <span className="play-material-lead">+{materialLead}</span>}
-        </div>
-      </div>
-      <ClockChip ms={clockMs} running={clockRunning} />
-    </div>
-  );
-}
 
 function IconFirst() {
   return (
@@ -222,18 +103,10 @@ function IconFlag() {
 }
 
 export interface PlayPanelProps {
-  capturedByWhite: PieceType[];
-  capturedByBlack: PieceType[];
   moveRows: MoveRow[];
   currentMoveIndex: number;
   openingName: string | null;
-  activePlayer: "w" | "b" | null;
-  clockResetToken: number;
-  initialClockMs: number;
   resultText: string | null;
-  whiteLabel: string;
-  blackLabel: string;
-  humanPlayer: "w" | "b";
   difficulty: Difficulty;
   onSelectDifficulty: (level: Difficulty) => void;
   gameOver: boolean;
@@ -247,18 +120,10 @@ export interface PlayPanelProps {
 }
 
 export default function PlayPanel({
-  capturedByWhite,
-  capturedByBlack,
   moveRows,
   currentMoveIndex,
   openingName,
-  activePlayer,
-  clockResetToken,
-  initialClockMs,
   resultText,
-  whiteLabel,
-  blackLabel,
-  humanPlayer,
   difficulty,
   onSelectDifficulty,
   gameOver,
@@ -271,8 +136,6 @@ export default function PlayPanel({
   onResign,
 }: PlayPanelProps) {
   const { t } = useTranslation();
-  const { pieceSetId } = useBoardSettings();
-  const { whiteMs, blackMs } = useChessClocks(activePlayer, clockResetToken, initialClockMs);
   const currentMoveRef = useRef<HTMLSpanElement>(null);
   const moveListBodyRef = useRef<HTMLOListElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -297,42 +160,11 @@ export default function PlayPanel({
     }
   }, [currentMoveIndex]);
 
-  const material = materialValue(capturedByWhite) - materialValue(capturedByBlack);
-
   const currentRow = currentMoveIndex > 0 ? Math.floor((currentMoveIndex - 1) / 2) : -1;
   const currentColor = currentMoveIndex % 2 === 1 ? "white" : "black";
 
-  // Opponent on top, human on the bottom -- matches the board's own
-  // orientation (which flips the same way when playing black).
-  const whiteRow = (
-    <PlayerRow
-      label={whiteLabel}
-      captured={capturedByWhite}
-      capturedColor="b"
-      pieceSetId={pieceSetId}
-      materialLead={material > 0 ? material : 0}
-      clockMs={whiteMs}
-      clockRunning={activePlayer === "w"}
-    />
-  );
-  const blackRow = (
-    <PlayerRow
-      label={blackLabel}
-      captured={capturedByBlack}
-      capturedColor="w"
-      pieceSetId={pieceSetId}
-      materialLead={material < 0 ? -material : 0}
-      clockMs={blackMs}
-      clockRunning={activePlayer === "b"}
-    />
-  );
-  const topRow = humanPlayer === "w" ? blackRow : whiteRow;
-  const bottomRow = humanPlayer === "w" ? whiteRow : blackRow;
-
   return (
     <div className="play-panel">
-      {topRow}
-
       <div className="play-engine-row">
         <span className="play-engine-label">{t("game.difficulty")}</span>
         <select
@@ -389,8 +221,6 @@ export default function PlayPanel({
           ))}
         </ol>
       </div>
-
-      {bottomRow}
 
       <div className="play-controls">
         <div className="play-controls-segment">

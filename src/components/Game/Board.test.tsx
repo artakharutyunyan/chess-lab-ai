@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Game } from "./index";
 import { BoardSettingsProvider } from "../../context/BoardSettingsContext";
@@ -68,6 +68,31 @@ test("keyboard: arrow keys move the roving cursor, Enter selects and moves", asy
   await user.keyboard("{ArrowUp}{ArrowUp}");
   await user.keyboard(" ");
   expect(screen.getByRole("gridcell", { name: /^c4, white pawn$/i })).toBeInTheDocument();
+});
+
+test("a player's clock reaching zero ends the game on time and freezes the board", () => {
+  vi.useFakeTimers();
+  try {
+    renderGame();
+    // Default time control is 10 minutes; White moves first and never
+    // moves here, so White's own clock is the one ticking down.
+    fireEvent.click(screen.getByRole("button", { name: /start game/i }));
+
+    act(() => {
+      vi.advanceTimersByTime(10 * 60 * 1000);
+    });
+
+    expect(screen.getByText(/black wins on time/i)).toBeInTheDocument();
+
+    // Board is frozen, same as after checkmate or resignation -- clicking
+    // a piece no longer selects it or highlights legal moves.
+    fireEvent.click(screen.getByRole("gridcell", { name: /^e2,/ }));
+    expect(
+      screen.getByRole("gridcell", { name: "e4" }).querySelector(".play-legal-mark")
+    ).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
 });
 
 test("keyboard: f flips the board", async () => {
