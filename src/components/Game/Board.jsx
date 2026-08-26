@@ -187,7 +187,11 @@ export class Board extends React.Component {
   }
 
   // full function for executing a move
-  execute_move(player, squares, start, end) {
+  // `promotion` is a UCI letter (q/r/b/n), only ever passed for a
+  // Stockfish-chosen move -- human clicks and the minimax fallback bot
+  // never pass one, so makeMove's own default (always queen) still applies
+  // for them.
+  execute_move(player, squares, start, end, promotion) {
     // castling rights and passant target as they stand right now, before
     // this move's setState calls below take effect -- matches the
     // original, which read this.state.* directly at each of these points
@@ -270,7 +274,7 @@ export class Board extends React.Component {
     }
 
     // make the move
-    copy_squares = makeMove(copy_squares, start, end, passantPos).slice();
+    copy_squares = makeMove(copy_squares, start, end, passantPos, promotion).slice();
 
     // en passant helper
     var passant_true =
@@ -454,7 +458,8 @@ export class Board extends React.Component {
       botColor,
       passed_in_squares.slice(),
       chosen.start,
-      chosen.end
+      chosen.end,
+      chosen.promotion
     );
   }
 

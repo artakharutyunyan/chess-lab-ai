@@ -44,7 +44,10 @@
 
 .rules-piece-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  /* min(280px, 100%) rather than a bare 280px -- on a ~320px viewport,
+     .rules-page's own padding leaves less than 280px for content, and a
+     track that can't shrink below its minimum overflows the page. */
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 16px;
 }
 

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { useFocusTrap } from "./useFocusTrap";
 import "./confirmDialog.styles.css";
 
 export interface ConfirmDialogProps {
@@ -22,6 +23,12 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  // Initial focus lands on Cancel, not the destructive Confirm action --
+  // an accidental Enter/Space right after the dialog opens (e.g. a
+  // double-click's second click landing here) shouldn't be able to
+  // complete the destructive action by itself.
+  const dialogRef = useFocusTrap<HTMLDivElement>(".confirm-dialog-button--cancel");
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onCancel();
@@ -33,10 +40,12 @@ export default function ConfirmDialog({
   return (
     <div className="confirm-dialog-backdrop" onClick={onCancel}>
       <div
+        ref={dialogRef}
         className="confirm-dialog"
         role="alertdialog"
         aria-modal="true"
         aria-label={message}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <p className="confirm-dialog-message">{message}</p>
@@ -52,7 +61,6 @@ export default function ConfirmDialog({
             type="button"
             className="confirm-dialog-button confirm-dialog-button--confirm"
             onClick={onConfirm}
-            autoFocus
           >
             {confirmLabel}
           </button>

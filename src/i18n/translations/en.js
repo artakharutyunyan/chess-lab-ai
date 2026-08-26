@@ -75,6 +75,9 @@ export const en = {
       boardSizeSmall: "Small",
       boardSizeMedium: "Medium",
       boardSizeLarge: "Large",
+      pieceCreditsIntro: "Piece art, all from",
+      pieceCreditsLibraryLink: "lichess's open piece library",
+      and: "and",
     },
     notFound: {
       title: "Oops! Page not found.",

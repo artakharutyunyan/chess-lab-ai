@@ -273,7 +273,7 @@ export default function PlayPanel({
   const { t } = useTranslation();
   const { pieceSetId } = useBoardSettings();
   const { whiteMs, blackMs } = useChessClocks(activePlayer, clockResetToken, initialClockMs);
-  const currentMoveRef = useRef<HTMLDivElement>(null);
+  const currentMoveRef = useRef<HTMLSpanElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [resignConfirmOpen, setResignConfirmOpen] = useState(false);
 

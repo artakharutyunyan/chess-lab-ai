@@ -75,6 +75,9 @@ export const ru = {
       boardSizeSmall: "Маленький",
       boardSizeMedium: "Средний",
       boardSizeLarge: "Большой",
+      pieceCreditsIntro: "Изображения фигур — все из",
+      pieceCreditsLibraryLink: "открытой библиотеки фигур lichess",
+      and: "и",
     },
     notFound: {
       title: "Ой! Страница не найдена.",

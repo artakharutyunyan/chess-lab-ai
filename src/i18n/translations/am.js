@@ -75,6 +75,9 @@ export const am = {
       boardSizeSmall: "Փոքր",
       boardSizeMedium: "Միջին",
       boardSizeLarge: "Մեծ",
+      pieceCreditsIntro: "Խաղաքարերի պատկերները վերցված են",
+      pieceCreditsLibraryLink: "lichess-ի բաց խաղաքարերի գրադարանից",
+      and: "և",
     },
     notFound: {
       title: "Վայ՜ Էջը չի գտնվել:",

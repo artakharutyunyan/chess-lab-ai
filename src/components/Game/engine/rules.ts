@@ -1,4 +1,10 @@
-import { Queen, filler_piece, type Player, type Squares } from "./pieces";
+import { Bishop, Knight, Queen, Rook, filler_piece, type Player, type Squares } from "./pieces";
+
+// UCI promotion letters (q/r/b/n) -> the piece class to promote to.
+// Queen is also the fallback for a missing/unrecognized letter, matching
+// this engine's long-standing default (human moves never pass a promotion
+// choice at all, so they always got -- and still get -- a queen).
+const PROMOTION_CLASSES = { q: Queen, r: Rook, b: Bishop, n: Knight } as const;
 
 // Every *_has_moved flag is 0 or 1, matching the Board state fields they're
 // built from (this.state.white_king_has_moved etc.) -- kept as number
@@ -15,11 +21,19 @@ export interface CastlingRights {
 // apply a move to a squares array and return the resulting array. Pieces
 // are mutated in place (matching the rest of this engine's convention) so
 // callers that need an independent snapshot must clone first.
+//
+// `promotion` (a UCI letter: q/r/b/n) picks what a pawn reaching the back
+// rank promotes to -- omit it (as every human move and the minimax fallback
+// bot do) for the existing always-queen behavior. Only Stockfish's chosen
+// moves carry a real value here, so an underpromotion it picks for a
+// tactical reason (e.g. a knight delivering checkmate where a queen would
+// stalemate) actually gets applied instead of being silently queened anyway.
 export function makeMove(
   squares: Squares,
   start: number,
   end: number,
-  passantPos: number
+  passantPos: number,
+  promotion?: string
 ): Squares {
   const copy_squares = squares.slice();
   // castling
@@ -59,12 +73,15 @@ export function makeMove(
   copy_squares[start].highlight = 1;
 
   // pawn promotion
+  const PromotionClass =
+    PROMOTION_CLASSES[(promotion?.toLowerCase() as keyof typeof PROMOTION_CLASSES) ?? "q"] ??
+    Queen;
   if (copy_squares[end].ascii === "p" && end >= 0 && end <= 7) {
-    copy_squares[end] = new Queen("w");
+    copy_squares[end] = new PromotionClass("w");
     copy_squares[end].highlight = 1;
   }
   if (copy_squares[end].ascii === "P" && end >= 56 && end <= 63) {
-    copy_squares[end] = new Queen("b");
+    copy_squares[end] = new PromotionClass("b");
     copy_squares[end].highlight = 1;
   }
 

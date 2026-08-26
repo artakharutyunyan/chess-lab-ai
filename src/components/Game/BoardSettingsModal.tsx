@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import BoardSettingsFields from "../BoardSettingsPage/BoardSettingsFields";
+import { useFocusTrap } from "./useFocusTrap";
 import "./boardSettingsModal.styles.css";
 
 function CloseIcon() {
@@ -26,6 +27,7 @@ function CloseIcon() {
 // the dialog and still there if you later visit /board.
 export default function BoardSettingsModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
+  const dialogRef = useFocusTrap<HTMLDivElement>();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -38,10 +40,12 @@ export default function BoardSettingsModal({ onClose }: { onClose: () => void })
   return (
     <div className="settings-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="settings-modal"
         role="dialog"
         aria-modal="true"
         aria-label={t("boardSettings.title")}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="settings-modal-header">
