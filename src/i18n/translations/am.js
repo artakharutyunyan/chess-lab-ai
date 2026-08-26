@@ -1,7 +1,7 @@
 export const am = {
   translation: {
     home: {
-      heroTitle: "ChessLab",
+      heroTitle: "Chess Lab Ai",
       heroTagline:
         "Խաղացեք իրական Stockfish շարժիչի դեմ, ուսումնասիրեք աշխարհի չեմպիոններին և կարգավորեք տախտակը ինքներդ:",
       playNow: "Խաղալ հիմա",
