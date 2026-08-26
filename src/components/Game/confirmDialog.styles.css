@@ -1,0 +1,66 @@
+.confirm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 17, 13, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  /* Above the settings modal's z-index: the two aren't expected to be open
+     at the same time, but if they ever are, the confirm dialog should win. */
+  z-index: 200;
+}
+
+.confirm-dialog {
+  width: min(360px, 100%);
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.55);
+}
+
+.confirm-dialog-message {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-dialog-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirm-dialog-button--cancel {
+  background-color: var(--panel-bg-2);
+  color: var(--panel-text);
+}
+
+.confirm-dialog-button--cancel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.confirm-dialog-button--confirm {
+  background-color: var(--accent);
+  color: #1d2018;
+}
+
+.confirm-dialog-button--confirm:hover {
+  background-color: #e6b358;
+}
+
+.confirm-dialog-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}

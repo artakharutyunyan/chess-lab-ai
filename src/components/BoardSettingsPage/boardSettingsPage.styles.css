@@ -125,3 +125,71 @@
 .piece-set-credit a:hover {
   color: var(--color-text);
 }
+
+.board-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-bottom: 20px;
+}
+
+.board-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.board-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.board-settings-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.board-settings-label {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.board-chip-group {
+  display: flex;
+  gap: 8px;
+}
+
+.board-chip {
+  padding: 8px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.board-chip:hover {
+  border-color: var(--color-text-muted);
+}
+
+.board-chip--selected {
+  border-color: var(--color-accent);
+}
+
+.board-chip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

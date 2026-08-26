@@ -38,6 +38,42 @@ export const BOARD_THEMES = [
     light: "#fbe4d8",
     dark: "#c2694f",
   },
+  {
+    id: "storm-blue",
+    name: "boardSettings.themes.stormBlue",
+    light: "#e3e7ee",
+    dark: "#5b6d8c",
+  },
+  {
+    id: "sea-foam",
+    name: "boardSettings.themes.seaFoam",
+    light: "#e6f2ec",
+    dark: "#6fae95",
+  },
+  {
+    id: "emerald-green",
+    name: "boardSettings.themes.emeraldGreen",
+    light: "#e2ede1",
+    dark: "#2f7a56",
+  },
+  {
+    id: "amethyst",
+    name: "boardSettings.themes.amethyst",
+    light: "#ece3f3",
+    dark: "#7a5ca3",
+  },
+  {
+    id: "sand-dune",
+    name: "boardSettings.themes.sandDune",
+    light: "#f4ecd8",
+    dark: "#c8a165",
+  },
+  {
+    id: "slate-gray",
+    name: "boardSettings.themes.slateGray",
+    light: "#e8eaec",
+    dark: "#6d7680",
+  },
 ] as const satisfies readonly BoardTheme[];
 
 export type BoardThemeId = (typeof BOARD_THEMES)[number]["id"];

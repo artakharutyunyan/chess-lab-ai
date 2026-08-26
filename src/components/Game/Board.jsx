@@ -9,7 +9,13 @@ import {
   isStalemate,
   isCheckmate,
 } from "./engine/rules";
-import { chooseBotMove, DIFFICULTY_PRESETS } from "./engine/ai";
+import {
+  chooseBotMove,
+  DIFFICULTY_PRESETS,
+  STOCKFISH_DIFFICULTY_PRESETS,
+} from "./engine/ai";
+import { squaresToFen, uciMoveToIndices } from "./engine/fen";
+import { stockfish } from "./engine/stockfish";
 import { TYPE_BY_LETTER } from "./pieceSets";
 import PlayBoard from "./PlayBoard";
 import PlayPanel from "./PlayPanel";
@@ -54,6 +60,7 @@ export class Board extends React.Component {
       history_white_collection: [null],
       history_black_collection: [null],
       mated: false,
+      resigned_by: null,
       move_made: false,
       capture_made: false,
       check_flash: false,
@@ -82,8 +89,11 @@ export class Board extends React.Component {
     this.setState({ time_control_ms: ms });
   }
 
+  // Unlike human_player/time control, difficulty can be changed mid-game
+  // (matches iChess: "engine strength can be changed during the game after
+  // any move") -- execute_bot reads this.state.difficulty fresh on every
+  // call, so a change here simply takes effect on the bot's next move.
   setDifficulty(level) {
-    if (this.state.game_started) return;
     this.setState({ difficulty: level });
   }
 
@@ -151,6 +161,7 @@ export class Board extends React.Component {
       history_white_collection: [null],
       history_black_collection: [null],
       mated: false,
+      resigned_by: null,
       move_made: false,
       capture_made: false,
       check_flash: false,
@@ -161,8 +172,26 @@ export class Board extends React.Component {
     });
   }
 
+  // Human resigns as whichever color they're playing -- ends the game
+  // immediately, same as checkmate (freezes the board, stops the bot from
+  // moving further; see execute_bot's `this.state.mated` guards). The
+  // confirmation prompt lives in PlayPanel (a ConfirmDialog, not a native
+  // window.confirm) -- by the time this is called, the user has already
+  // confirmed.
+  resign() {
+    if (!this.state.game_started || this.state.mated) return;
+    this.setState({
+      mated: true,
+      resigned_by: this.state.human_player,
+    });
+  }
+
   // full function for executing a move
-  execute_move(player, squares, start, end) {
+  // `promotion` is a UCI letter (q/r/b/n), only ever passed for a
+  // Stockfish-chosen move -- human clicks and the minimax fallback bot
+  // never pass one, so makeMove's own default (always queen) still applies
+  // for them.
+  execute_move(player, squares, start, end, promotion) {
     // castling rights and passant target as they stand right now, before
     // this move's setState calls below take effect -- matches the
     // original, which read this.state.* directly at each of these points
@@ -245,7 +274,7 @@ export class Board extends React.Component {
     }
 
     // make the move
-    copy_squares = makeMove(copy_squares, start, end, passantPos).slice();
+    copy_squares = makeMove(copy_squares, start, end, passantPos, promotion).slice();
 
     // en passant helper
     var passant_true =
@@ -363,31 +392,53 @@ export class Board extends React.Component {
     }
   }
 
-  // Chess bot for whichever color isn't the human player
-  execute_bot(passed_in_squares) {
+  // Chess bot for whichever color isn't the human player. Tries Stockfish
+  // (engine/stockfish.ts) first; if its worker fails to start (WASM
+  // unsupported, file blocked, etc.) falls back to the local minimax bot
+  // (engine/ai.ts) so the game keeps working either way.
+  async execute_bot(passed_in_squares) {
     if (this.state.mated) return;
 
     const botColor = this.state.human_player === "w" ? "b" : "w";
-    const { maxDepth, timeBudgetMs } = DIFFICULTY_PRESETS[this.state.difficulty];
+    const castlingRights = this.getCastlingRights();
+    const passantPos = this.state.passant_pos;
 
     const avoidMove =
       this.state.repetition >= 2
         ? { start: this.state.second_pos, end: this.state.first_pos }
         : null;
 
-    // board evaluation using mini_max algorithm by looking at future turns
-    const chosen = chooseBotMove({
-      squares: passed_in_squares,
-      maxDepth,
-      timeBudgetMs,
-      passantPos: this.state.passant_pos,
-      castlingRights: this.getCastlingRights(),
-      avoidMove,
-      botColor,
-    });
+    let chosen;
+    try {
+      const { skillLevel, moveTimeMs } =
+        STOCKFISH_DIFFICULTY_PRESETS[this.state.difficulty];
+      const fen = squaresToFen(passed_in_squares, botColor, castlingRights, passantPos);
+      const uciMove = await stockfish.getBestMove(fen, { skillLevel, moveTimeMs });
+      chosen = uciMoveToIndices(uciMove);
+    } catch {
+      const { maxDepth, timeBudgetMs } = DIFFICULTY_PRESETS[this.state.difficulty];
+      // board evaluation using mini_max algorithm by looking at future turns
+      chosen = chooseBotMove({
+        squares: passed_in_squares,
+        maxDepth,
+        timeBudgetMs,
+        passantPos,
+        castlingRights,
+        avoidMove,
+        botColor,
+      });
+    }
 
-    // chosen === null indicates that the bot is in checkmate/stalemate
+    // chosen == null indicates the (fallback) bot is in checkmate/stalemate
+    // -- Stockfish's getBestMove rejects rather than resolving with no move.
     if (chosen == null) return;
+
+    // The position may have moved on (restart, history scrubbing) while we
+    // were awaiting the engine -- applying a move computed against a
+    // now-stale board would corrupt state, so bail instead. Not a concern
+    // for the synchronous fallback path above, but real once getBestMove
+    // makes this method async.
+    if (this.state.mated || this.state.squares !== passed_in_squares) return;
 
     // increment this.state.repetition if the bot keeps moving a piece back and forth consecutively
     if (
@@ -407,7 +458,8 @@ export class Board extends React.Component {
       botColor,
       passed_in_squares.slice(),
       chosen.start,
-      chosen.end
+      chosen.end,
+      chosen.promotion
     );
   }
 
@@ -623,7 +675,9 @@ export class Board extends React.Component {
 
     let resultText = null;
     if (not_history) {
-      if (white_mated) resultText = this.props.t("game.blackWins");
+      if (this.state.resigned_by === "w") resultText = this.props.t("game.blackWinsResignation");
+      else if (this.state.resigned_by === "b") resultText = this.props.t("game.whiteWinsResignation");
+      else if (white_mated) resultText = this.props.t("game.blackWins");
       else if (black_mated) resultText = this.props.t("game.whiteWins");
       else if (stale) resultText = this.props.t("game.stalemateResult");
     }
@@ -640,12 +694,12 @@ export class Board extends React.Component {
             <audio src={capture} controls autoPlay hidden />{" "}
           </div>
         )}
-        {black_mated && not_history && (
+        {(black_mated || this.state.resigned_by === "b") && not_history && (
           <div>
             <audio src={blackDefeat} controls autoPlay hidden />{" "}
           </div>
         )}
-        {white_mated && not_history && (
+        {(white_mated || this.state.resigned_by === "w") && not_history && (
           <div>
             <audio src={whiteDefeat} controls autoPlay hidden />{" "}
           </div>
@@ -696,12 +750,16 @@ export class Board extends React.Component {
                 whiteLabel={this.props.t("game.white")}
                 blackLabel={this.props.t("game.black")}
                 humanPlayer={this.state.human_player}
+                difficulty={this.state.difficulty}
+                onSelectDifficulty={(level) => this.setDifficulty(level)}
+                gameOver={this.state.mated}
                 onFirst={() => this.viewHistory("back_atw")}
                 onPrev={() => this.viewHistory("back")}
                 onNext={() => this.viewHistory("next")}
                 onLast={() => this.viewHistory("next_atw")}
                 onFlip={() => this.flipBoard()}
                 onRestart={() => this.reset()}
+                onResign={() => this.resign()}
               />
             ) : (
               <PlaySetup

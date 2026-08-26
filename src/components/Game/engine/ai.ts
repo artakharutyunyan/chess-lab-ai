@@ -263,6 +263,20 @@ function minimax(
   return best_value;
 }
 
+// Six levels (Easy through Grandmaster, matching what iChess's difficulty
+// selector offers) shared by both engines: Stockfish (the primary bot, see
+// engine/stockfish.ts) and this file's own minimax, which only runs as a
+// fallback if the Stockfish worker fails to start.
+export const DIFFICULTY_LEVELS = [
+  "easy",
+  "medium",
+  "hard",
+  "expert",
+  "master",
+  "grandmaster",
+] as const;
+export type Difficulty = (typeof DIFFICULTY_LEVELS)[number];
+
 export interface DifficultyPreset {
   maxDepth: number;
   timeBudgetMs: number;
@@ -271,12 +285,40 @@ export interface DifficultyPreset {
 // See docs/PLAY-PAGE-SPEC.md sibling discussion -- depth is the only real
 // strength lever this engine has, and depth cost grows fast with no
 // transposition table. These were picked from measured search times
-// (see chooseBotMove's iterative deepening below) so "hard" stays
-// responsive rather than picking a depth and hoping.
-export const DIFFICULTY_PRESETS: Record<"easy" | "medium" | "hard", DifficultyPreset> = {
+// (see chooseBotMove's iterative deepening below) so "grandmaster" (the old
+// "hard") stays responsive rather than picking a depth and hoping.
+export const DIFFICULTY_PRESETS: Record<Difficulty, DifficultyPreset> = {
   easy: { maxDepth: 1, timeBudgetMs: 50 },
-  medium: { maxDepth: 3, timeBudgetMs: 300 },
-  hard: { maxDepth: 6, timeBudgetMs: 1500 },
+  medium: { maxDepth: 2, timeBudgetMs: 150 },
+  hard: { maxDepth: 3, timeBudgetMs: 300 },
+  expert: { maxDepth: 4, timeBudgetMs: 600 },
+  master: { maxDepth: 5, timeBudgetMs: 1000 },
+  grandmaster: { maxDepth: 6, timeBudgetMs: 1500 },
+};
+
+export interface StockfishPreset {
+  skillLevel: number; // Stockfish's own "Skill Level" UCI option, 0-20.
+  moveTimeMs: number;
+  // Community-measured approximate Elo for this Skill Level at a generous
+  // time budget (commonly-cited engine-vs-engine testing, not an official
+  // Stockfish guarantee) -- shown in the UI so "Grandmaster" isn't just a
+  // label. Our actual movetime above is much shorter than those tests used,
+  // so real playing strength, especially at the low end, runs somewhat
+  // below this number.
+  approxElo: number;
+}
+
+// Skill Level alone doesn't make Stockfish think as slowly as it plays
+// weakly, so low levels also get a short movetime -- otherwise "Easy" would
+// still search hard within its skill cap and play a stronger game than the
+// label promises.
+export const STOCKFISH_DIFFICULTY_PRESETS: Record<Difficulty, StockfishPreset> = {
+  easy: { skillLevel: 1, moveTimeMs: 200, approxElo: 1400 },
+  medium: { skillLevel: 5, moveTimeMs: 400, approxElo: 1700 },
+  hard: { skillLevel: 9, moveTimeMs: 600, approxElo: 1950 },
+  expert: { skillLevel: 13, moveTimeMs: 800, approxElo: 2200 },
+  master: { skillLevel: 17, moveTimeMs: 1200, approxElo: 2500 },
+  grandmaster: { skillLevel: 20, moveTimeMs: 2000, approxElo: 2850 },
 };
 
 export interface ChooseBotMoveArgs {

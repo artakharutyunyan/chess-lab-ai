@@ -1,0 +1,104 @@
+.rules-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+}
+
+.rules-title {
+  text-align: center;
+  color: var(--color-text);
+  margin: 0 0 16px 0;
+}
+
+.rules-intro {
+  max-width: 640px;
+  margin: 0 auto 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 17px;
+  line-height: 1.47;
+}
+
+.rules-section {
+  margin-bottom: 40px;
+}
+
+.rules-heading {
+  font-size: 20px;
+  color: var(--color-text);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.rules-body {
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.rules-body:last-child {
+  margin-bottom: 0;
+}
+
+.rules-piece-grid {
+  display: grid;
+  /* min(280px, 100%) rather than a bare 280px -- on a ~320px viewport,
+     .rules-page's own padding leaves less than 280px for content, and a
+     track that can't shrink below its minimum overflows the page. */
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 16px;
+}
+
+.rules-piece-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.rules-piece-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.rules-piece-icon .piece {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.rules-piece-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 4px 0;
+  text-transform: capitalize;
+}
+
+.rules-piece-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.rules-subsection {
+  margin-bottom: 20px;
+}
+
+.rules-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.rules-subheading {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 6px 0;
+}

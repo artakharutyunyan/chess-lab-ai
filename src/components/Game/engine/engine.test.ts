@@ -1,4 +1,4 @@
-import { King, Queen, Rook, Pawn, filler_piece, initializeBoard } from "./pieces";
+import { King, Queen, Rook, Knight, Pawn, filler_piece, initializeBoard } from "./pieces";
 import type { Squares } from "./pieces";
 import {
   makeMove,
@@ -67,7 +67,7 @@ test("en passant: capturing pawn removes the passed pawn", () => {
   expect(after[25].ascii).toBe(null); // captured black pawn removed
 });
 
-test("pawn promotion: reaching the last rank becomes a queen", () => {
+test("pawn promotion: reaching the last rank becomes a queen by default", () => {
   const squares = emptyBoard();
   squares[60] = new King("w");
   squares[4] = new King("b");
@@ -75,6 +75,16 @@ test("pawn promotion: reaching the last rank becomes a queen", () => {
   const after = makeMove(squares, 8, 0, 65);
   expect(after[0].ascii).toBe("q");
   expect(after[0]).toBeInstanceOf(Queen);
+});
+
+test("pawn promotion: an explicit UCI promotion letter (Stockfish's choice) is honored", () => {
+  const squares = emptyBoard();
+  squares[60] = new King("w");
+  squares[4] = new King("b");
+  squares[8] = new Pawn("w"); // one step from promoting (rank 7 -> rank 8)
+  const after = makeMove(squares, 8, 0, 65, "n");
+  expect(after[0].ascii).toBe("n");
+  expect(after[0]).toBeInstanceOf(Knight);
 });
 
 test("back-rank mate is detected as checkmate", () => {
