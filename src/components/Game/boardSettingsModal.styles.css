@@ -1,0 +1,67 @@
+.settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 17, 13, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 100;
+}
+
+.settings-modal {
+  width: min(640px, 100%);
+  max-height: min(720px, 100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  border-radius: 18px;
+  box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.settings-modal-title {
+  font-size: 18px;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.settings-modal-close {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.settings-modal-close:hover {
+  background-color: var(--color-border);
+}
+
+.settings-modal-close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.settings-modal-body {
+  overflow-y: auto;
+  padding: 20px 24px 28px;
+}
+
+.settings-modal-body .board-settings-section:last-child {
+  margin-bottom: 0;
+}

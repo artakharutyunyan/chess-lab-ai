@@ -13,41 +13,16 @@ import blackPawn from "../../images/black_pawn.png";
 import blackQueen from "../../images/black_queen.png";
 import blackRock from "../../images/black_rook.png";
 
-// "Minimal" is the kiwen-suwi set (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/)
-// by neverRare (https://github.com/neverRare), sourced from
-// https://github.com/lichess-org/lila/tree/master/public/piece/kiwen-suwi.
-import minimalWK from "../../images/pieces/minimal/wK.svg";
-import minimalWQ from "../../images/pieces/minimal/wQ.svg";
-import minimalWR from "../../images/pieces/minimal/wR.svg";
-import minimalWB from "../../images/pieces/minimal/wB.svg";
-import minimalWN from "../../images/pieces/minimal/wN.svg";
-import minimalWP from "../../images/pieces/minimal/wP.svg";
-import minimalBK from "../../images/pieces/minimal/bK.svg";
-import minimalBQ from "../../images/pieces/minimal/bQ.svg";
-import minimalBR from "../../images/pieces/minimal/bR.svg";
-import minimalBB from "../../images/pieces/minimal/bB.svg";
-import minimalBN from "../../images/pieces/minimal/bN.svg";
-import minimalBP from "../../images/pieces/minimal/bP.svg";
-
-// "Bold" is the chessnut set (Apache License 2.0,
-// https://github.com/LexLuengas/chessnut-pieces/blob/master/LICENSE.txt)
-// by Alexis Luengas (https://github.com/LexLuengas), sourced from
-// https://github.com/lichess-org/lila/tree/master/public/piece/chessnut.
-import boldWK from "../../images/pieces/bold/wK.svg";
-import boldWQ from "../../images/pieces/bold/wQ.svg";
-import boldWR from "../../images/pieces/bold/wR.svg";
-import boldWB from "../../images/pieces/bold/wB.svg";
-import boldWN from "../../images/pieces/bold/wN.svg";
-import boldWP from "../../images/pieces/bold/wP.svg";
-import boldBK from "../../images/pieces/bold/bK.svg";
-import boldBQ from "../../images/pieces/bold/bQ.svg";
-import boldBR from "../../images/pieces/bold/bR.svg";
-import boldBB from "../../images/pieces/bold/bB.svg";
-import boldBN from "../../images/pieces/bold/bN.svg";
-import boldBP from "../../images/pieces/bold/bP.svg";
-
 export type PieceType = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
-export type PieceSetId = "classic" | "minimal" | "bold";
+export type PieceSetId =
+  | "classic"
+  | "minimal"
+  | "bold"
+  | "staunton"
+  | "merida"
+  | "three-d"
+  | "rustic"
+  | "celtic";
 
 export interface PieceSetOption {
   id: PieceSetId;
@@ -59,6 +34,11 @@ export const PIECE_SETS: PieceSetOption[] = [
   { id: "classic", name: "boardSettings.pieceSets.classic" },
   { id: "minimal", name: "boardSettings.pieceSets.minimal" },
   { id: "bold", name: "boardSettings.pieceSets.bold" },
+  { id: "staunton", name: "boardSettings.pieceSets.staunton" },
+  { id: "merida", name: "boardSettings.pieceSets.merida" },
+  { id: "three-d", name: "boardSettings.pieceSets.threeD" },
+  { id: "rustic", name: "boardSettings.pieceSets.rustic" },
+  { id: "celtic", name: "boardSettings.pieceSets.celtic" },
 ];
 
 export const DEFAULT_PIECE_SET_ID: PieceSetId = "classic";
@@ -81,6 +61,60 @@ const PIECE_NAMES: Record<PieceType, string> = {
   pawn: "pawn",
 };
 
+// Reverse of TYPE_BY_LETTER -- lowercase (white) base letter per type. Used
+// by PlayPanel's captured-piece trays to look up the right getPieceIcon
+// ascii for a PieceType once it also knows which color was captured.
+export const LETTER_BY_TYPE: Record<PieceType, string> = {
+  king: "k",
+  queen: "q",
+  rook: "r",
+  bishop: "b",
+  knight: "n",
+  pawn: "p",
+};
+
+// Every SVG set below (everything except "classic", which uses the original
+// PNG art) lives under src/images/pieces/<dir>/{wK,wQ,wR,wB,wN,wP,bK,bQ,bR,
+// bB,bN,bP}.svg -- loaded in bulk here rather than as ~90 individual named
+// imports. All are sourced from lichess's open-source piece library
+// (https://github.com/lichess-org/lila/tree/master/public/piece), picked
+// for having an unambiguous, redistributable license (see the credits in
+// BoardSettingsFields.tsx) -- deliberately excludes lichess sets whose
+// license is "freeware"/non-commercial/unlisted.
+const svgAssets = import.meta.glob<string>("../../images/pieces/*/*.svg", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
+const LETTER_TO_FILE: Record<string, string> = {
+  k: "wK",
+  q: "wQ",
+  r: "wR",
+  b: "wB",
+  n: "wN",
+  p: "wP",
+  K: "bK",
+  Q: "bQ",
+  R: "bR",
+  B: "bB",
+  N: "bN",
+  P: "bP",
+};
+
+function loadSvgSet(dir: string): Record<string, string> {
+  const set: Record<string, string> = {};
+  for (const [letter, file] of Object.entries(LETTER_TO_FILE)) {
+    const path = `../../images/pieces/${dir}/${file}.svg`;
+    const url = svgAssets[path];
+    if (url == null) {
+      throw new Error(`Missing piece asset: ${path}`);
+    }
+    set[letter] = url;
+  }
+  return set;
+}
+
 // Keyed by the engine's ascii convention: lowercase = white, uppercase = black.
 const ICONS_BY_SET: Record<PieceSetId, Record<string, string>> = {
   classic: {
@@ -97,34 +131,13 @@ const ICONS_BY_SET: Record<PieceSetId, Record<string, string>> = {
     N: blackKnight,
     P: blackPawn,
   },
-  minimal: {
-    k: minimalWK,
-    q: minimalWQ,
-    r: minimalWR,
-    b: minimalWB,
-    n: minimalWN,
-    p: minimalWP,
-    K: minimalBK,
-    Q: minimalBQ,
-    R: minimalBR,
-    B: minimalBB,
-    N: minimalBN,
-    P: minimalBP,
-  },
-  bold: {
-    k: boldWK,
-    q: boldWQ,
-    r: boldWR,
-    b: boldWB,
-    n: boldWN,
-    p: boldWP,
-    K: boldBK,
-    Q: boldBQ,
-    R: boldBR,
-    B: boldBB,
-    N: boldBN,
-    P: boldBP,
-  },
+  minimal: loadSvgSet("minimal"),
+  bold: loadSvgSet("bold"),
+  staunton: loadSvgSet("staunton"),
+  merida: loadSvgSet("merida"),
+  "three-d": loadSvgSet("three-d"),
+  rustic: loadSvgSet("rustic"),
+  celtic: loadSvgSet("celtic"),
 };
 
 // Returns the icon element for a piece, given its engine `ascii` code

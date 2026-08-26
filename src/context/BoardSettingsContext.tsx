@@ -11,11 +11,27 @@ import { PIECE_SETS, DEFAULT_PIECE_SET_ID } from "../components/Game/pieceSets";
 import type { BoardThemeId } from "../components/Game/boardThemes";
 import type { PieceSetId } from "../components/Game/pieceSets";
 
+export type LastMoveStyle = "flat" | "sunken";
+export type BoardSize = "small" | "medium" | "large";
+
+const LAST_MOVE_STYLES: LastMoveStyle[] = ["flat", "sunken"];
+const BOARD_SIZES: BoardSize[] = ["small", "medium", "large"];
+const DEFAULT_LAST_MOVE_STYLE: LastMoveStyle = "flat";
+const DEFAULT_BOARD_SIZE: BoardSize = "large";
+
 interface BoardSettingsContextValue {
   boardThemeId: BoardThemeId;
   pieceSetId: PieceSetId;
+  showMoveHints: boolean;
+  raisedPieces: boolean;
+  lastMoveStyle: LastMoveStyle;
+  boardSize: BoardSize;
   setBoardThemeId: (id: BoardThemeId) => void;
   setPieceSetId: (id: PieceSetId) => void;
+  setShowMoveHints: (value: boolean) => void;
+  setRaisedPieces: (value: boolean) => void;
+  setLastMoveStyle: (value: LastMoveStyle) => void;
+  setBoardSize: (value: BoardSize) => void;
 }
 
 const STORAGE_KEY = "boardSettings";
@@ -27,6 +43,10 @@ const BoardSettingsContext = createContext<BoardSettingsContextValue | null>(
 interface StoredSettings {
   boardThemeId?: string;
   pieceSetId?: string;
+  showMoveHints?: boolean;
+  raisedPieces?: boolean;
+  lastMoveStyle?: string;
+  boardSize?: string;
 }
 
 function readStoredSettings(): StoredSettings {
@@ -55,6 +75,30 @@ function getInitialPieceSetId(): PieceSetId {
     : DEFAULT_PIECE_SET_ID;
 }
 
+function getInitialShowMoveHints(): boolean {
+  const stored = readStoredSettings().showMoveHints;
+  return typeof stored === "boolean" ? stored : true;
+}
+
+function getInitialRaisedPieces(): boolean {
+  const stored = readStoredSettings().raisedPieces;
+  return typeof stored === "boolean" ? stored : true;
+}
+
+function getInitialLastMoveStyle(): LastMoveStyle {
+  const stored = readStoredSettings().lastMoveStyle;
+  return LAST_MOVE_STYLES.includes(stored as LastMoveStyle)
+    ? (stored as LastMoveStyle)
+    : DEFAULT_LAST_MOVE_STYLE;
+}
+
+function getInitialBoardSize(): BoardSize {
+  const stored = readStoredSettings().boardSize;
+  return BOARD_SIZES.includes(stored as BoardSize)
+    ? (stored as BoardSize)
+    : DEFAULT_BOARD_SIZE;
+}
+
 export function BoardSettingsProvider({ children }: { children: ReactNode }) {
   const [boardThemeId, setBoardThemeId] = useState<BoardThemeId>(
     getInitialBoardThemeId
@@ -62,13 +106,30 @@ export function BoardSettingsProvider({ children }: { children: ReactNode }) {
   const [pieceSetId, setPieceSetId] = useState<PieceSetId>(
     getInitialPieceSetId
   );
+  const [showMoveHints, setShowMoveHints] = useState<boolean>(
+    getInitialShowMoveHints
+  );
+  const [raisedPieces, setRaisedPieces] = useState<boolean>(
+    getInitialRaisedPieces
+  );
+  const [lastMoveStyle, setLastMoveStyle] = useState<LastMoveStyle>(
+    getInitialLastMoveStyle
+  );
+  const [boardSize, setBoardSize] = useState<BoardSize>(getInitialBoardSize);
 
   useEffect(() => {
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ boardThemeId, pieceSetId })
+      JSON.stringify({
+        boardThemeId,
+        pieceSetId,
+        showMoveHints,
+        raisedPieces,
+        lastMoveStyle,
+        boardSize,
+      })
     );
-  }, [boardThemeId, pieceSetId]);
+  }, [boardThemeId, pieceSetId, showMoveHints, raisedPieces, lastMoveStyle, boardSize]);
 
   const setBoardThemeIdCb = useCallback((id: BoardThemeId) => {
     setBoardThemeId(id);
@@ -76,14 +137,34 @@ export function BoardSettingsProvider({ children }: { children: ReactNode }) {
   const setPieceSetIdCb = useCallback((id: PieceSetId) => {
     setPieceSetId(id);
   }, []);
+  const setShowMoveHintsCb = useCallback((value: boolean) => {
+    setShowMoveHints(value);
+  }, []);
+  const setRaisedPiecesCb = useCallback((value: boolean) => {
+    setRaisedPieces(value);
+  }, []);
+  const setLastMoveStyleCb = useCallback((value: LastMoveStyle) => {
+    setLastMoveStyle(value);
+  }, []);
+  const setBoardSizeCb = useCallback((value: BoardSize) => {
+    setBoardSize(value);
+  }, []);
 
   return (
     <BoardSettingsContext.Provider
       value={{
         boardThemeId,
         pieceSetId,
+        showMoveHints,
+        raisedPieces,
+        lastMoveStyle,
+        boardSize,
         setBoardThemeId: setBoardThemeIdCb,
         setPieceSetId: setPieceSetIdCb,
+        setShowMoveHints: setShowMoveHintsCb,
+        setRaisedPieces: setRaisedPiecesCb,
+        setLastMoveStyle: setLastMoveStyleCb,
+        setBoardSize: setBoardSizeCb,
       }}
     >
       {children}

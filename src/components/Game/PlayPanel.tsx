@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { PieceType } from "./pieceSets";
-import CapturedPieceIcon from "./CapturedPieceIcon";
+import { getPieceIcon, LETTER_BY_TYPE, type PieceType, type PieceSetId } from "./pieceSets";
 import type { MoveRow } from "./notation";
+import { DIFFICULTY_LEVELS, STOCKFISH_DIFFICULTY_PRESETS, type Difficulty } from "./engine/ai";
+import BoardSettingsModal from "./BoardSettingsModal";
+import ConfirmDialog from "./ConfirmDialog";
+import { useBoardSettings } from "../../context/BoardSettingsContext";
 import "./playPanel.styles.css";
 
 const CAPTURE_ORDER: PieceType[] = ["pawn", "knight", "bishop", "rook", "queen"];
@@ -28,6 +31,14 @@ function sortForTray(pieces: PieceType[]): PieceType[] {
 
 function materialValue(pieces: PieceType[]): number {
   return pieces.reduce((sum, p) => sum + PIECE_VALUE[p], 0);
+}
+
+// The engine's ascii convention is lowercase = white, uppercase = black --
+// a captured-piece tray only ever holds one color (the *opponent's* pieces,
+// see capturedColor below), so this just picks the right case.
+function capturedAscii(type: PieceType, color: "w" | "b"): string {
+  const letter = LETTER_BY_TYPE[type];
+  return color === "w" ? letter : letter.toUpperCase();
 }
 
 // Ticks whichever side's clock is active, one second at a time. Isolated
@@ -81,12 +92,16 @@ function ClockChip({ ms, running }: { ms: number; running: boolean }) {
 function PlayerRow({
   label,
   captured,
+  capturedColor,
+  pieceSetId,
   materialLead,
   clockMs,
   clockRunning,
 }: {
   label: string;
   captured: PieceType[];
+  capturedColor: "w" | "b";
+  pieceSetId: PieceSetId;
   materialLead: number;
   clockMs: number;
   clockRunning: boolean;
@@ -98,7 +113,9 @@ function PlayerRow({
         <div className="play-player-name">{label}</div>
         <div className="play-captured-row">
           {sortForTray(captured).map((type, i) => (
-            <CapturedPieceIcon key={i} type={type} />
+            <span className="play-captured-piece" key={i}>
+              {getPieceIcon(capturedAscii(type, capturedColor), pieceSetId)}
+            </span>
           ))}
           {materialLead > 0 && <span className="play-material-lead">+{materialLead}</span>}
         </div>
@@ -174,6 +191,35 @@ function IconRestart() {
     </svg>
   );
 }
+function IconGear() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <circle cx="10" cy="10" r="2.6" fill="currentColor" />
+      <path
+        d="M10 3.2v1.8M10 15v1.8M16.8 10H15M5 10H3.2M14.8 5.2l-1.3 1.3M6.5 13.5l-1.3 1.3M14.8 14.8l-1.3-1.3M6.5 6.5 5.2 5.2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+function IconFlag() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path
+        d="M6 3v14"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6 4 C9 2.5 11 5.5 14 4 V10 C11 11.5 9 8.5 6 10 Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 export interface PlayPanelProps {
   capturedByWhite: PieceType[];
@@ -188,12 +234,16 @@ export interface PlayPanelProps {
   whiteLabel: string;
   blackLabel: string;
   humanPlayer: "w" | "b";
+  difficulty: Difficulty;
+  onSelectDifficulty: (level: Difficulty) => void;
+  gameOver: boolean;
   onFirst: () => void;
   onPrev: () => void;
   onNext: () => void;
   onLast: () => void;
   onFlip: () => void;
   onRestart: () => void;
+  onResign: () => void;
 }
 
 export default function PlayPanel({
@@ -209,16 +259,23 @@ export default function PlayPanel({
   whiteLabel,
   blackLabel,
   humanPlayer,
+  difficulty,
+  onSelectDifficulty,
+  gameOver,
   onFirst,
   onPrev,
   onNext,
   onLast,
   onFlip,
   onRestart,
+  onResign,
 }: PlayPanelProps) {
   const { t } = useTranslation();
+  const { pieceSetId } = useBoardSettings();
   const { whiteMs, blackMs } = useChessClocks(activePlayer, clockResetToken, initialClockMs);
   const currentMoveRef = useRef<HTMLDivElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [resignConfirmOpen, setResignConfirmOpen] = useState(false);
 
   useEffect(() => {
     currentMoveRef.current?.scrollIntoView({ block: "nearest" });
@@ -235,6 +292,8 @@ export default function PlayPanel({
     <PlayerRow
       label={whiteLabel}
       captured={capturedByWhite}
+      capturedColor="b"
+      pieceSetId={pieceSetId}
       materialLead={material > 0 ? material : 0}
       clockMs={whiteMs}
       clockRunning={activePlayer === "w"}
@@ -244,6 +303,8 @@ export default function PlayPanel({
     <PlayerRow
       label={blackLabel}
       captured={capturedByBlack}
+      capturedColor="w"
+      pieceSetId={pieceSetId}
       materialLead={material < 0 ? -material : 0}
       clockMs={blackMs}
       clockRunning={activePlayer === "b"}
@@ -255,6 +316,23 @@ export default function PlayPanel({
   return (
     <div className="play-panel">
       {topRow}
+
+      <div className="play-engine-row">
+        <span className="play-engine-label">{t("game.difficulty")}</span>
+        <select
+          className="play-difficulty-select"
+          value={difficulty}
+          aria-label={t("game.changeDifficulty")}
+          onChange={(e) => onSelectDifficulty(e.target.value as Difficulty)}
+        >
+          {DIFFICULTY_LEVELS.map((level) => (
+            <option key={level} value={level}>
+              {t(`game.difficulty${level.charAt(0).toUpperCase()}${level.slice(1)}`)} (~
+              {STOCKFISH_DIFFICULTY_PRESETS[level].approxElo})
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="play-movelist">
         <div className="play-movelist-header">
@@ -317,6 +395,15 @@ export default function PlayPanel({
         <button
           type="button"
           className="play-control-button play-control-button--solo"
+          onClick={() => setResignConfirmOpen(true)}
+          disabled={gameOver}
+          aria-label={t("game.resign")}
+        >
+          <IconFlag />
+        </button>
+        <button
+          type="button"
+          className="play-control-button play-control-button--solo"
           onClick={onFlip}
           aria-label={t("game.flipBoard")}
         >
@@ -330,7 +417,29 @@ export default function PlayPanel({
         >
           <IconRestart />
         </button>
+        <button
+          type="button"
+          className="play-control-button play-control-button--solo"
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t("game.openSettings")}
+        >
+          <IconGear />
+        </button>
       </div>
+
+      {settingsOpen && <BoardSettingsModal onClose={() => setSettingsOpen(false)} />}
+      {resignConfirmOpen && (
+        <ConfirmDialog
+          message={t("game.confirmResign")}
+          confirmLabel={t("game.resign")}
+          cancelLabel={t("game.cancel")}
+          onConfirm={() => {
+            setResignConfirmOpen(false);
+            onResign();
+          }}
+          onCancel={() => setResignConfirmOpen(false)}
+        />
+      )}
     </div>
   );
 }

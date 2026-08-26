@@ -43,7 +43,7 @@ export default function PlayBoard({
   onStepBack,
   onStepForward,
 }: PlayBoardProps) {
-  const { pieceSetId } = useBoardSettings();
+  const { pieceSetId, showMoveHints, raisedPieces, lastMoveStyle } = useBoardSettings();
   const { t } = useTranslation();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -174,7 +174,10 @@ export default function PlayBoard({
                   }}
                 >
                   {lastMoveSquares.includes(index) && (
-                    <span className="play-square-overlay play-square-overlay--last" aria-hidden="true" />
+                    <span
+                      className={`play-square-overlay play-square-overlay--last-${lastMoveStyle}`}
+                      aria-hidden="true"
+                    />
                   )}
                   {selected === index && (
                     <span className="play-square-overlay play-square-overlay--selected" aria-hidden="true" />
@@ -194,7 +197,11 @@ export default function PlayBoard({
                   )}
                   {piece.ascii != null && (
                     <span
-                      className={`play-piece${draggedIndex === index ? " play-piece--dragging" : ""}`}
+                      className={
+                        "play-piece" +
+                        (draggedIndex === index ? " play-piece--dragging" : "") +
+                        (raisedPieces ? " play-piece--raised" : "")
+                      }
                       aria-hidden="true"
                       draggable={isMovable}
                       onDragStart={(e) => {
@@ -214,7 +221,7 @@ export default function PlayBoard({
                       {getPieceIcon(piece.ascii, pieceSetId)}
                     </span>
                   )}
-                  {legal && (
+                  {legal && showMoveHints && (
                     <span
                       className={`play-legal-mark${legal.capture ? " play-legal-mark--capture" : ""}`}
                       aria-hidden="true"

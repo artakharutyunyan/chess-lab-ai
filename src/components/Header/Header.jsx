@@ -82,6 +82,9 @@ function NavLinks({ onNavigate }) {
       <NavLink to="/board" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
         {t("header.board")}
       </NavLink>
+      <NavLink to="/rules" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.rules")}
+      </NavLink>
     </>
   );
 }
@@ -103,7 +106,7 @@ function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="brand-logo-link" onMouseDown={suppressMouseFocusRing}>
-          <img src={logo} className="brand-logo" alt="World of Chess" draggable={false} />
+          <img src={logo} className="brand-logo" alt="ChessLab" draggable={false} />
         </Link>
 
         <nav className="header-nav">
