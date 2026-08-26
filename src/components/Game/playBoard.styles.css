@@ -1,28 +1,17 @@
 /* Board component per docs/PLAY-PAGE-SPEC.md. */
 
 .play-board {
-  /* --sq-size-setting comes from the user's Board size pick (Game/index.jsx);
-     88px is the fallback for anyone who hasn't set one. */
-  --sq-size: var(--sq-size-setting, 88px);
-
+  /* --sq-size is computed on .board-page (game.styles.css), which accounts
+     for the user's Board size pick *and* the viewport's width and height --
+     88px here is only a fallback for rendering a board outside .board-page. */
   display: flex;
   flex-direction: column;
-  width: calc(var(--sq-size) * 8);
-  height: calc(var(--sq-size) * 8);
+  width: calc(var(--sq-size, 88px) * 8);
+  height: calc(var(--sq-size, 88px) * 8);
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 28px 70px -34px rgba(35, 38, 31, 0.5);
   flex-shrink: 0;
-}
-
-/* Below this width the board and panel stack into a single column (see
-   .board-page in game.styles.css) -- shrink squares to fit the viewport
-   instead of overflowing it. Coordinates already live inside the squares,
-   so no gutter layout changes are needed at the smaller size. */
-@media screen and (max-width: 1100px) {
-  .play-board {
-    --sq-size: min(var(--sq-size-setting, 88px), calc((100vw - 32px) / 8));
-  }
 }
 
 [data-theme="dark"] .play-board {

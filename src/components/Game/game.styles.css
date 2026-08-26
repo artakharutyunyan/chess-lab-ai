@@ -80,6 +80,23 @@
 }
 
 .board-page {
+  /* --sq-size drives both the board (playBoard.styles.css) and the panel's
+     matching height (playPanel.styles.css) -- computed here, on their
+     shared ancestor, so both can read it via inheritance.
+     On desktop (board and panel side by side) it's shrunk to whatever fits
+     the viewport's actual height, not just its width: without this, a
+     shorter screen (a 14" laptop, a browser window that isn't maximized)
+     forced the whole play page to scroll vertically even though nothing
+     about the game needed the desktop-default 88px squares specifically.
+     The 264px subtracted is everything above/around the 8 board rows at
+     that default size -- the 56px header, the board-page's own 32px+48px
+     top/bottom padding, and the two ~52px player bars with their 10px
+     gaps above/below the board (2 * 52 + 2 * 10 = 124) -- plus a few
+     spare px so rounding never trips the scrollbar back on. 40px is a
+     lower bound so an extremely short window shrinks the board only so
+     far, rather than toward unreadably tiny or negative squares. */
+  --sq-size: max(40px, min(var(--sq-size-setting, 88px), calc((100vh - 264px) / 8)));
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -94,11 +111,10 @@
    this just keeps the page from overflowing narrow viewports until then. */
 @media screen and (max-width: 1100px) {
   .board-page {
-    /* Below this width .play-panel goes height: auto (playPanel.styles.css)
-       -- its height then changes turn to turn as the move list fills in
-       and the result banner appears. With align-items: center, any such
-       change re-centers the whole board+panel group and visibly shifts the
-       board on screen; flex-start leaves the board's own position alone. */
+    /* Board and panel stack vertically below this width, so the page is
+       already expected to scroll (same as any tall mobile page) -- shrink
+       for available width only here, not height. */
+    --sq-size: min(var(--sq-size-setting, 88px), calc((100vw - 32px) / 8));
     align-items: flex-start;
     padding: 24px 16px 40px;
     gap: 20px;
