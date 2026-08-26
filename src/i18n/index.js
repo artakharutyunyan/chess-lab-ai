@@ -14,7 +14,7 @@ const resources = {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: Cookies.get("lng") || "am",
+  lng: Cookies.get("lng") || "en",
 
   keySeparator: ".",
 

@@ -1,7 +1,7 @@
 export const en = {
   translation: {
     home: {
-      heroTitle: "ChessLab",
+      heroTitle: "Chess Lab Ai",
       heroTagline:
         "Play a real Stockfish opponent, browse the World Chess Champions, and make the board your own.",
       playNow: "Play Now",

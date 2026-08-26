@@ -274,11 +274,27 @@ export default function PlayPanel({
   const { pieceSetId } = useBoardSettings();
   const { whiteMs, blackMs } = useChessClocks(activePlayer, clockResetToken, initialClockMs);
   const currentMoveRef = useRef<HTMLSpanElement>(null);
+  const moveListBodyRef = useRef<HTMLOListElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [resignConfirmOpen, setResignConfirmOpen] = useState(false);
 
   useEffect(() => {
-    currentMoveRef.current?.scrollIntoView({ block: "nearest" });
+    // Scroll only the move list's own scroll container into position --
+    // element.scrollIntoView() walks up every scrollable ancestor including
+    // the page itself, which on mobile (where the panel sits below the
+    // board) yanked the whole page down to the move list after every move.
+    const el = currentMoveRef.current;
+    const container = moveListBodyRef.current;
+    if (!el || !container) return;
+    const elTop = el.offsetTop;
+    const elBottom = elTop + el.offsetHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    if (elTop < viewTop) {
+      container.scrollTop = elTop;
+    } else if (elBottom > viewBottom) {
+      container.scrollTop = elBottom - container.clientHeight;
+    }
   }, [currentMoveIndex]);
 
   const material = materialValue(capturedByWhite) - materialValue(capturedByBlack);
@@ -345,7 +361,7 @@ export default function PlayPanel({
             </>
           )}
         </div>
-        <ol className="play-movelist-body">
+        <ol className="play-movelist-body" ref={moveListBodyRef}>
           {moveRows.map((row, i) => (
             <li className="play-move-row" key={row.number}>
               <span className="play-move-number">{row.number}.</span>

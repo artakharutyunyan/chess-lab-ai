@@ -1,4 +1,4 @@
-# ChessLab
+# Chess Lab Ai
 
 A chess app built with React: play against a real Stockfish engine, browse the
 history of World Chess Champions, and customize how the board and pieces look.

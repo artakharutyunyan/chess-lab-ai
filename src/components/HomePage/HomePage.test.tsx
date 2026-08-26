@@ -12,7 +12,7 @@ function renderHome() {
 
 test("renders the hero heading and a Play Now link to /game", () => {
   renderHome();
-  expect(screen.getByRole("heading", { level: 1, name: /chesslab/i })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 1, name: /chess lab ai/i })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /play now/i })).toHaveAttribute("href", "/game");
 });
 
