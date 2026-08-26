@@ -73,9 +73,6 @@ function NavLinks({ onNavigate }) {
       <NavLink to="/" end className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
         {t("header.home")}
       </NavLink>
-      <NavLink to="/champions" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
-        {t("header.worldChampions")}
-      </NavLink>
       <NavLink to="/game" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
         {t("header.play")}
       </NavLink>
@@ -84,6 +81,9 @@ function NavLinks({ onNavigate }) {
       </NavLink>
       <NavLink to="/rules" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
         {t("header.rules")}
+      </NavLink>
+      <NavLink to="/champions" className={navLinkClass} onMouseDown={suppressMouseFocusRing} onClick={onNavigate}>
+        {t("header.worldChampions")}
       </NavLink>
     </>
   );
